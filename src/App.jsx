@@ -8,6 +8,9 @@ import Admin from "./pages/Admin";
 import PrivateRoute from "./routes/PrivateRoute";
 import { useAuth } from "./context/AuthContext";
 
+// ✅ Import global styles
+import "./styles/app.css";
+
 function App() {
   const { user } = useAuth();
 
