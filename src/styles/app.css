@@ -73,3 +73,14 @@ button {
   color: red;
   margin-top: 1rem;
 }
+
+.dashboard-container {
+  text-align: center;
+  padding: 2rem;
+}
+
+.coming-soon {
+  margin-top: 2rem;
+  font-style: italic;
+  color: gray;
+}
