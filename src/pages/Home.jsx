@@ -1,20 +1,25 @@
-import { Link } from "react-router-dom";
-import "../styles/app.css"; // Or your own CSS file
+import { useNavigate } from "react-router-dom";
+import "../styles/app.css"; // your shared styles
 
 export default function Home() {
+  const navigate = useNavigate();
+
   return (
     <div className="home-container">
-      <h1>DailyQuestLog</h1>
-      <p>Gamify your daily tasks. Earn XP. Defeat procrastination.</p>
+      <h1 className="home-title">🎯 DailyQuestLog</h1>
+      <p className="home-subtitle">Embark on your daily journey. Earn XP. Defeat procrastination!</p>
 
-      <div className="cta-buttons">
-        <Link to="/signup">
-          <button className="btn">Get Started</button>
-        </Link>
-        <Link to="/login">
-          <button className="btn secondary">Login</button>
-        </Link>
+      <div className="home-buttons">
+        <button className="rpg-button" onClick={() => navigate("/signup")}>
+          🎮 Play Now
+        </button>
+        <button className="rpg-button secondary" onClick={() => navigate("/login")}>
+          🔑 Login
+        </button>
       </div>
+
+      {/* Optional future feature */}
+      {/* <audio controls loop src="/bgm.mp3" /> */}
     </div>
   );
 }
