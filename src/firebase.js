@@ -1,4 +1,5 @@
 // src/firebase.js
+console.log("API KEY CHECK:", import.meta.env.VITE_FIREBASE_API_KEY);
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
