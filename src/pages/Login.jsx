@@ -2,8 +2,7 @@ import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
-import { FiHome } from "react-icons/fi";
-import "../styles/app.css";
+import Header from "../components/Header"; // Ensure this is exported correctly
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,47 +14,49 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
+    if (!email.includes("@") || !email.includes(".")) {
+      return setError("Please enter a valid email.");
+    }
+
+    if (password.length < 6) {
+      return setError("Password must be at least 6 characters.");
+    }
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
       navigate("/dashboard");
     } catch (err) {
       console.error("Login failed:", err.message);
-      setError("Invalid email or password");
+      setError("Invalid email or password.");
     }
   };
 
   return (
-    <div className="form-container">
-      {/* Header with Home Button */}
-      <div className="auth-header">
-        <button onClick={() => navigate("/")} className="home-btn">
-          <FiHome size={20} />
-        </button>
+    <>
+      <Header />
+      <div className="form-container">
         <h2 className="auth-title">Login</h2>
+        <form onSubmit={handleLogin} className="auth-form">
+          <input
+            type="email"
+            placeholder="Email"
+            className="auth-input auth-input-wide"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="auth-input auth-input-wide"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button type="submit" className="auth-btn auth-btn-narrow">Login</button>
+          {error && <p className="auth-error">{error}</p>}
+        </form>
       </div>
-
-      <form onSubmit={handleLogin} className="auth-form">
-        <input
-          type="email"
-          placeholder="Email"
-          className="auth-input"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="auth-input"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit" className="auth-btn">
-          Login
-        </button>
-        {error && <p className="auth-error">{error}</p>}
-      </form>
-    </div>
+    </>
   );
 }
