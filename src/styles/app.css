@@ -332,3 +332,201 @@ body {
   max-width: 180px;
   margin: 0 auto;
 }
+
+/* Add this to styles/app.css */
+
+/* General retro body styling */
+body {
+  margin: 0;
+  font-family: 'Press Start 2P', cursive, sans-serif;
+  background: linear-gradient(to bottom, #111, #151515, #1a1a1a, #1c1c1c);
+  background-attachment: fixed;
+  color: #fff;
+  text-align: center;
+}
+
+/* Header home icon placement */
+.header-container {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+}
+
+.home-btn {
+  background: transparent;
+  border: none;
+  color: #ffcc00;
+  cursor: pointer;
+  font-size: 20px;
+  transition: transform 0.2s;
+}
+
+.home-btn:hover {
+  transform: scale(1.2);
+}
+
+/* Dashboard layout */
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 80px;
+  gap: 20px;
+  min-height: 100vh;
+}
+
+.days-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.day-button {
+  padding: 10px 18px;
+  background-color: #5f3dc4;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.day-button:hover {
+  background-color: #7b5eff;
+}
+
+.day-button.active {
+  background-color: #ffd43b;
+  color: #000;
+  font-weight: bold;
+}
+
+/* Quest section */
+.quest-panel {
+  width: 90%;
+  max-width: 600px;
+  margin-top: 20px;
+  background: #1f1f1f;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.15);
+}
+
+.quest-panel h2 {
+  font-size: 16px;
+  color: #ffd43b;
+  margin-bottom: 14px;
+}
+
+.quest-input {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.quest-input input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 12px;
+}
+
+.quest-input button {
+  padding: 10px 16px;
+  border: none;
+  background-color: #20c997;
+  color: white;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.quest-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.quest-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #333;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 6px 0;
+  font-size: 12px;
+}
+
+.quest-item button {
+  background: #e64980;
+  border: none;
+  border-radius: 4px;
+  padding: 6px;
+  cursor: pointer;
+}
+
+/* Character + stats */
+.stats-panel {
+  text-align: center;
+  margin-top: 20px;
+  background: #1f1f1f;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.15);
+}
+
+.stats-panel img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.stats-panel p {
+  font-size: 12px;
+  margin: 4px 0;
+}
+
+.stats-panel h3 {
+  font-size: 14px;
+  color: #ffd43b;
+  margin: 10px 0;
+}
+
+.logout-btn {
+  background-color: #7b3fe4;
+  color: white;
+  font-weight: bold;
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-top: 14px;
+}
+
+.logout-btn:hover {
+  background-color: #a174ff;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .dashboard {
+    padding-top: 60px;
+  }
+  .quest-input {
+    flex-direction: column;
+  }
+  .quest-input input {
+    width: 100%;
+  }
+  .quest-input button {
+    width: 100%;
+  }
+}
