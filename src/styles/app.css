@@ -615,23 +615,23 @@ body {
 }
 
 .nav-btn {
+  background-color: transparent;
+  color: #ccc;
+  border: 1px solid #444;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: transparent;
-  border: 1px solid #3d4f73;
-  border-radius: 8px;
-  color: #b0bac9;
+  gap: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
 }
 
 .nav-btn:hover {
-  background: rgba(61, 79, 115, 0.3);
-  border-color: #5d7098;
-  color: #e0e6ed;
+  background: linear-gradient(90deg, #7e30e1, #c434db);
+  color: white;
+  box-shadow: 0 0 8px #8e44ad99;
   transform: translateY(-1px);
 }
 
@@ -1408,4 +1408,16 @@ body {
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.logout-green {
+  background: linear-gradient(to right, #2ecc71, #27ae60);
+  color: white;
+  font-weight: bold;
+}
+
+.logout-red {
+  background: linear-gradient(to right, #e74c3c, #c0392b);
+  color: white;
+  font-weight: bold;
 }

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FiUser, FiSettings, FiTrendingUp } from "react-icons/fi";
 import { auth } from "../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -7,6 +7,7 @@ import { signOut } from "firebase/auth";
 export default function Header() {
   const navigate = useNavigate();
   const [user] = useAuthState(auth);
+  const location = useLocation();
 
   const handleNav = (path) => {
     if (!user) {
@@ -54,7 +55,10 @@ export default function Header() {
                   {user.email?.charAt(0).toUpperCase()}
                 </div>
               </div>
-              <button onClick={() => signOut(auth)} className="nav-btn">
+              <button
+                onClick={() => signOut(auth)}
+                className={`nav-btn ${location.pathname === "/dashboard" ? "logout-red" : "logout-green"}`}
+              >
                 Logout
               </button>
             </>
