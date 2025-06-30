@@ -2,7 +2,6 @@ import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
-import Header from "../components/Header"; // Ensure this is exported correctly
 
 export default function Login() {
   const [email, setEmail] = useState("");
