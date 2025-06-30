@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Header";
 
 export default function Dashboard() {
   const [selectedDay, setSelectedDay] = useState("Monday");
@@ -128,7 +127,6 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-wrapper">
-      <Header />
       
       <div className="dashboard-container">
         {/* Day Navigation */}
