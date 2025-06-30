@@ -270,6 +270,7 @@ body {
 .auth-title {
   font-size: 20px;
   color: #fff;
+  margin-bottom: 1rem;
 }
 
 .auth-form {

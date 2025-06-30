@@ -35,7 +35,7 @@ export default function Signup() {
     <div className="auth-page">
       <MiniHeader />
       <div className="form-container">
-        <h2 className="auth-title">Sign Up</h2>
+        <h2 className="auth-title">🎮 Create Your Hero</h2>
         <form onSubmit={handleSignup} className="auth-form">
           <input
             type="email"
@@ -53,7 +53,7 @@ export default function Signup() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button type="submit" className="auth-btn auth-btn-narrow">Sign Up</button>
+          <button type="submit" className="auth-btn auth-btn-narrow">Begin Quest</button>
           {error && <p className="auth-error">{error}</p>}
         </form>
       </div>

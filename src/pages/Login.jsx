@@ -35,7 +35,7 @@ export default function Login() {
     <div className="auth-page">
       <MiniHeader />
       <div className="form-container">
-        <h2 className="auth-title">Login</h2>
+        <h2 className="auth-title">🛡️ Welcome Back Hero</h2>
         <form onSubmit={handleLogin} className="auth-form">
           <input
             type="email"
@@ -53,7 +53,7 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button type="submit" className="auth-btn auth-btn-narrow">Login</button>
+          <button type="submit" className="auth-btn auth-btn-narrow">Enter Realm</button>
           {error && <p className="auth-error">{error}</p>}
         </form>
       </div>
