@@ -25,25 +25,23 @@ export default function Header() {
           <h1 className="brand-title">QuestLog</h1>
         </div>
 
-        {/* Navigation */}
-        <nav className="header-nav">
+        {/* Navigation - Centered */}
+        <nav className="header-nav" style={{ flex: 1, justifyContent: "center", display: "flex", gap: "1.5rem" }}>
           <button className="nav-btn" onClick={() => handleNav("/dashboard")} title="Dashboard">
             <FiTrendingUp size={20} />
             <span>Dashboard</span>
           </button>
-
           <button className="nav-btn" onClick={() => handleNav("/profile")} title="Profile">
             <FiUser size={20} />
             <span>Profile</span>
           </button>
-
           <button className="nav-btn" onClick={() => handleNav("/settings")} title="Settings">
             <FiSettings size={20} />
             <span>Settings</span>
           </button>
         </nav>
 
-        {/* User Info or Logout */}
+        {/* User Info */}
         <div className="header-user">
           {user ? (
             <>

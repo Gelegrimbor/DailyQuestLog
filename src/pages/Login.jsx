@@ -32,7 +32,6 @@ export default function Login() {
 
   return (
     <>
-      <Header />
       <div className="form-container">
         <h2 className="auth-title">Login</h2>
         <form onSubmit={handleLogin} className="auth-form">
