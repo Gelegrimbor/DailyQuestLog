@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
+import MiniHeader from "../components/MiniHeader";
 
 export default function Signup() {
   const [email, setEmail] = useState("");
@@ -23,7 +24,7 @@ export default function Signup() {
 
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      navigate("/set-username"); // or your desired page after signup
+      navigate("/set-username");
     } catch (err) {
       console.error("Signup failed:", err.message);
       setError("Signup failed. Email may already be in use.");
@@ -31,7 +32,8 @@ export default function Signup() {
   };
 
   return (
-    <>
+    <div className="auth-page">
+      <MiniHeader />
       <div className="form-container">
         <h2 className="auth-title">Sign Up</h2>
         <form onSubmit={handleSignup} className="auth-form">
@@ -51,12 +53,10 @@ export default function Signup() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button type="submit" className="auth-btn auth-btn-narrow">
-            Sign Up
-          </button>
+          <button type="submit" className="auth-btn auth-btn-narrow">Sign Up</button>
           {error && <p className="auth-error">{error}</p>}
         </form>
       </div>
-    </>
+    </div>
   );
 }

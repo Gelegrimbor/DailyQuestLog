@@ -143,6 +143,19 @@ body {
   transition: 0.3s;
   font-weight: bold;
 }
+/* Floating animation for Play Now button */
+.btn-primary {
+  animation: floatPulse 2s ease-in-out infinite;
+}
+
+@keyframes floatPulse {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
 
 .button-row .play {
   background-color: #5f3dc4;
@@ -1357,4 +1370,41 @@ body {
 
 .fade-in {
   animation: fadeIn 0.5s ease;
+}
+
+/* Auth Page Fullscreen Centering */
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+}
+
+/* Mini Header for Auth Pages */
+.mini-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.mini-header:hover {
+  transform: scale(1.05);
+}
+.mini-header .brand-icon {
+  font-size: 2.5rem;
+  color: #f39c12;
+  margin-bottom: 0.5rem;
+}
+.mini-header .brand-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: linear-gradient(45deg, #f39c12, #e74c3c);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

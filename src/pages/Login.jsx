@@ -2,6 +2,7 @@ import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
+import MiniHeader from "../components/MiniHeader";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -31,7 +32,8 @@ export default function Login() {
   };
 
   return (
-    <>
+    <div className="auth-page">
+      <MiniHeader />
       <div className="form-container">
         <h2 className="auth-title">Login</h2>
         <form onSubmit={handleLogin} className="auth-form">
@@ -55,6 +57,6 @@ export default function Login() {
           {error && <p className="auth-error">{error}</p>}
         </form>
       </div>
-    </>
+    </div>
   );
 }
