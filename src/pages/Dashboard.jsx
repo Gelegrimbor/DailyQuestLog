@@ -1,7 +1,4 @@
 import { useEffect, useState } from "react";
-import { signOut } from "firebase/auth";
-import { auth } from "../firebase";
-import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const [selectedDay, setSelectedDay] = useState("Monday");
@@ -27,8 +24,6 @@ export default function Dashboard() {
 
   const [enemyHp, setEnemyHp] = useState(100);
   const maxEnemyHp = 100;
-
-  const navigate = useNavigate();
 
   const handleAddTask = () => {
     if (!newTask.trim()) return;
@@ -56,7 +51,6 @@ export default function Dashboard() {
     setTasks({ ...tasks, [selectedDay]: updatedTasks });
     setCompletedTasks({ ...completedTasks, [selectedDay]: updatedCompleted });
 
-    // Enemy takes damage
     setEnemyHp(prev => Math.max(0, prev - 10));
   };
 
@@ -72,11 +66,6 @@ export default function Dashboard() {
     setTasks({ ...tasks, [selectedDay]: updatedTasks });
 
     setEnemyHp(prev => Math.min(maxEnemyHp, prev + 10));
-  };
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    navigate("/");
   };
 
   const days = [
@@ -210,11 +199,8 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-
-            <button className="logout-btn" onClick={handleLogout}>
-              Logout
-            </button>
           </div>
+
         </div>
       </div>
     </div>
