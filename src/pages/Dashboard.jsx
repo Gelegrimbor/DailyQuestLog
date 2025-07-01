@@ -3,23 +3,13 @@ import { useEffect, useState } from "react";
 export default function Dashboard() {
   const [selectedDay, setSelectedDay] = useState("Monday");
   const [tasks, setTasks] = useState({
-    Monday: [],
-    Tuesday: [],
-    Wednesday: [],
-    Thursday: [],
-    Friday: [],
-    Saturday: [],
-    Sunday: [],
+    Monday: [], Tuesday: [], Wednesday: [],
+    Thursday: [], Friday: [], Saturday: [], Sunday: []
   });
   const [newTask, setNewTask] = useState("");
   const [completedTasks, setCompletedTasks] = useState({
-    Monday: [],
-    Tuesday: [],
-    Wednesday: [],
-    Thursday: [],
-    Friday: [],
-    Saturday: [],
-    Sunday: [],
+    Monday: [], Tuesday: [], Wednesday: [],
+    Thursday: [], Friday: [], Saturday: [], Sunday: []
   });
 
   const [enemyHp, setEnemyHp] = useState(100);
@@ -74,7 +64,10 @@ export default function Dashboard() {
   ];
 
   const getCurrentDay = () => {
-    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const dayNames = [
+      "Sunday", "Monday", "Tuesday", "Wednesday",
+      "Thursday", "Friday", "Saturday"
+    ];
     return dayNames[new Date().getDay()];
   };
 
@@ -85,6 +78,7 @@ export default function Dashboard() {
   return (
     <div className="dashboard-wrapper">
       <div className="dashboard-container">
+
         {/* Day Navigation */}
         <div className="day-navigation">
           <h2 className="section-title">Quest Calendar</h2>
@@ -132,7 +126,6 @@ export default function Dashboard() {
               </button>
             </div>
 
-            {/* Active Quests */}
             <div className="quest-section">
               <h3 className="quest-section-title">Active Quests</h3>
               <ul className="quest-list">
@@ -146,8 +139,8 @@ export default function Dashboard() {
                         <span className="quest-reward">+5 XP</span>
                       </div>
                       <div className="quest-actions">
-                        <button onClick={() => handleCompleteTask(i)} className="quest-complete" title="Complete Quest">✓</button>
-                        <button onClick={() => handleDeleteTask(i)} className="quest-delete" title="Delete Quest">✕</button>
+                        <button onClick={() => handleCompleteTask(i)} className="quest-complete">✓</button>
+                        <button onClick={() => handleDeleteTask(i)} className="quest-delete">✕</button>
                       </div>
                     </li>
                   ))
@@ -155,7 +148,6 @@ export default function Dashboard() {
               </ul>
             </div>
 
-            {/* Completed Quests */}
             {completedTasks[selectedDay].length > 0 && (
               <div className="quest-section">
                 <h3 className="quest-section-title">Completed Quests</h3>
@@ -167,7 +159,7 @@ export default function Dashboard() {
                         <span className="quest-reward completed">+5 XP</span>
                       </div>
                       <div className="quest-actions">
-                        <button onClick={() => handleUncompleteTask(i)} className="quest-undo" title="Mark as Incomplete">↶</button>
+                        <button onClick={() => handleUncompleteTask(i)} className="quest-undo">↶</button>
                       </div>
                     </li>
                   ))}
@@ -176,26 +168,47 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Enemy Panel */}
-          <div className="character-panel">
-            <div className="character-header">
-              <h2 className="section-title">Enemy Encounter</h2>
-            </div>
-            <div className="character-avatar">
-              <img src="/images/enemy.png" alt="Enemy" className="avatar-img" />
-              <div className="level-badge">HP</div>
-            </div>
-            <div className="character-bars">
-              <div className="stat-bar">
-                <label>Enemy Health</label>
-                <div className="bar-container">
-                  <div className="bar hp-bar">
-                    <div
-                      className="bar-fill hp-fill"
-                      style={{ width: `${(enemyHp / maxEnemyHp) * 100}%` }}
-                    ></div>
+          {/* Right Panel (User + Enemy) */}
+          <div className="right-panels">
+            {/* User Panel */}
+            <div className="user-panel">
+              <div className="character-header">
+                <h2 className="section-title">Your Character</h2>
+              </div>
+              <div className="character-avatar">
+                <img src="/images/hero.png" alt="User" className="avatar-img" />
+              </div>
+              <h3 className="username">"Username"</h3>
+              <div className="character-bars">
+                <div className="stat-bar">
+                  <label>Level 1 XP 0 / 20</label>
+                  <div className="bar-container">
+                    <div className="bar xp-bar">
+                      <div className="bar-fill xp-fill" style={{ width: `0%` }}></div>
+                    </div>
                   </div>
-                  <span className="bar-text">{enemyHp}/{maxEnemyHp}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Enemy Panel */}
+            <div className="enemy-panel">
+              <div className="character-header">
+                <h2 className="section-title">Enemy Encounter</h2>
+              </div>
+              <div className="character-avatar">
+                <img src="/images/enemy.png" alt="Enemy" className="avatar-img" />
+              </div>
+              <h3 className="enemy-name">"Enemy Name"</h3>
+              <div className="character-bars">
+                <div className="stat-bar">
+                  <label>Health</label>
+                  <div className="bar-container">
+                    <div className="bar hp-bar">
+                      <div className="bar-fill hp-fill" style={{ width: `${(enemyHp / maxEnemyHp) * 100}%` }}></div>
+                    </div>
+                    <span className="bar-text">{enemyHp}/{maxEnemyHp}</span>
+                  </div>
                 </div>
               </div>
             </div>
