@@ -1,4 +1,3 @@
-// Enhanced Dashboard.jsx with improved RPG-themed design
 import { useEffect, useState } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
@@ -7,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 export default function Dashboard() {
   const [selectedDay, setSelectedDay] = useState("Monday");
   const [tasks, setTasks] = useState({
-    Monday: ["Drink 2L of Water", "Morning Exercise"],
+    Monday: [],
     Tuesday: [],
     Wednesday: [],
     Thursday: [],
@@ -25,15 +24,10 @@ export default function Dashboard() {
     Saturday: [],
     Sunday: [],
   });
-  const [userStats, setUserStats] = useState({
-    level: 1,
-    xp: 0,
-    maxXp: 20,
-    hp: 20,
-    maxHp: 20,
-    streak: 0,
-    totalCompleted: 0
-  });
+
+  const [enemyHp, setEnemyHp] = useState(100);
+  const maxEnemyHp = 100;
+
   const navigate = useNavigate();
 
   const handleAddTask = () => {
@@ -55,44 +49,29 @@ export default function Dashboard() {
     const task = tasks[selectedDay][index];
     const updatedTasks = [...tasks[selectedDay]];
     const updatedCompleted = [...completedTasks[selectedDay]];
-    
+
     updatedTasks.splice(index, 1);
     updatedCompleted.push(task);
-    
+
     setTasks({ ...tasks, [selectedDay]: updatedTasks });
     setCompletedTasks({ ...completedTasks, [selectedDay]: updatedCompleted });
-    
-    // Update user stats
-    setUserStats(prev => {
-      const newXp = prev.xp + 5;
-      const levelUp = newXp >= prev.maxXp;
-      return {
-        ...prev,
-        xp: levelUp ? newXp - prev.maxXp : newXp,
-        level: levelUp ? prev.level + 1 : prev.level,
-        maxXp: levelUp ? prev.maxXp + 10 : prev.maxXp,
-        totalCompleted: prev.totalCompleted + 1
-      };
-    });
+
+    // Enemy takes damage
+    setEnemyHp(prev => Math.max(0, prev - 10));
   };
 
   const handleUncompleteTask = (index) => {
     const task = completedTasks[selectedDay][index];
     const updatedCompleted = [...completedTasks[selectedDay]];
     const updatedTasks = [...tasks[selectedDay]];
-    
+
     updatedCompleted.splice(index, 1);
     updatedTasks.push(task);
-    
+
     setCompletedTasks({ ...completedTasks, [selectedDay]: updatedCompleted });
     setTasks({ ...tasks, [selectedDay]: updatedTasks });
-    
-    // Update user stats (decrease)
-    setUserStats(prev => ({
-      ...prev,
-      xp: Math.max(0, prev.xp - 5),
-      totalCompleted: Math.max(0, prev.totalCompleted - 1)
-    }));
+
+    setEnemyHp(prev => Math.min(maxEnemyHp, prev + 10));
   };
 
   const handleLogout = async () => {
@@ -101,20 +80,9 @@ export default function Dashboard() {
   };
 
   const days = [
-    "Monday",
-    "Tuesday", 
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
+    "Monday", "Tuesday", "Wednesday", "Thursday",
+    "Friday", "Saturday", "Sunday"
   ];
-
-  const getDayProgress = (day) => {
-    const total = tasks[day].length + completedTasks[day].length;
-    const completed = completedTasks[day].length;
-    return total > 0 ? Math.round((completed / total) * 100) : 0;
-  };
 
   const getCurrentDay = () => {
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -127,7 +95,6 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-wrapper">
-      
       <div className="dashboard-container">
         {/* Day Navigation */}
         <div className="day-navigation">
@@ -140,7 +107,9 @@ export default function Dashboard() {
                 onClick={() => setSelectedDay(day)}
               >
                 <span className="day-name">{day.slice(0, 3)}</span>
-                <span className="day-progress">{getDayProgress(day)}%</span>
+                <span className="day-progress">
+                  {completedTasks[day].length}/{tasks[day].length + completedTasks[day].length}
+                </span>
               </button>
             ))}
           </div>
@@ -188,20 +157,8 @@ export default function Dashboard() {
                         <span className="quest-reward">+5 XP</span>
                       </div>
                       <div className="quest-actions">
-                        <button 
-                          onClick={() => handleCompleteTask(i)} 
-                          className="quest-complete"
-                          title="Complete Quest"
-                        >
-                          ✓
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteTask(i)} 
-                          className="quest-delete"
-                          title="Delete Quest"
-                        >
-                          ✕
-                        </button>
+                        <button onClick={() => handleCompleteTask(i)} className="quest-complete" title="Complete Quest">✓</button>
+                        <button onClick={() => handleDeleteTask(i)} className="quest-delete" title="Delete Quest">✕</button>
                       </div>
                     </li>
                   ))
@@ -221,13 +178,7 @@ export default function Dashboard() {
                         <span className="quest-reward completed">+5 XP</span>
                       </div>
                       <div className="quest-actions">
-                        <button 
-                          onClick={() => handleUncompleteTask(i)} 
-                          className="quest-undo"
-                          title="Mark as Incomplete"
-                        >
-                          ↶
-                        </button>
+                        <button onClick={() => handleUncompleteTask(i)} className="quest-undo" title="Mark as Incomplete">↶</button>
                       </div>
                     </li>
                   ))}
@@ -236,65 +187,26 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Character Panel */}
+          {/* Enemy Panel */}
           <div className="character-panel">
             <div className="character-header">
-              <h2 className="section-title">Character</h2>
+              <h2 className="section-title">Enemy Encounter</h2>
             </div>
-
             <div className="character-avatar">
-              <div className="avatar-container">
-                <img src="/images/archer.png" alt="Character Avatar" className="avatar-img" />
-                <div className="level-badge">Lv.{userStats.level}</div>
-              </div>
-              
-              <div className="character-bars">
-                <div className="stat-bar">
-                  <label>Health</label>
-                  <div className="bar-container">
-                    <div className="bar hp-bar">
-                      <div 
-                        className="bar-fill hp-fill" 
-                        style={{width: `${(userStats.hp / userStats.maxHp) * 100}%`}}
-                      ></div>
-                    </div>
-                    <span className="bar-text">{userStats.hp}/{userStats.maxHp}</span>
-                  </div>
-                </div>
-
-                <div className="stat-bar">
-                  <label>Experience</label>
-                  <div className="bar-container">
-                    <div className="bar xp-bar">
-                      <div 
-                        className="bar-fill xp-fill" 
-                        style={{width: `${(userStats.xp / userStats.maxXp) * 100}%`}}
-                      ></div>
-                    </div>
-                    <span className="bar-text">{userStats.xp}/{userStats.maxXp}</span>
-                  </div>
-                </div>
-              </div>
+              <img src="/images/enemy.png" alt="Enemy" className="avatar-img" />
+              <div className="level-badge">HP</div>
             </div>
-
-            <div className="character-stats">
-              <h3>Statistics</h3>
-              <div className="stats-grid">
-                <div className="stat-item">
-                  <span className="stat-label">Level</span>
-                  <span className="stat-value">{userStats.level}</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Quests Completed</span>
-                  <span className="stat-value">{userStats.totalCompleted}</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Current Streak</span>
-                  <span className="stat-value">{userStats.streak} days</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">XP per Quest</span>
-                  <span className="stat-value">5</span>
+            <div className="character-bars">
+              <div className="stat-bar">
+                <label>Enemy Health</label>
+                <div className="bar-container">
+                  <div className="bar hp-bar">
+                    <div
+                      className="bar-fill hp-fill"
+                      style={{ width: `${(enemyHp / maxEnemyHp) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="bar-text">{enemyHp}/{maxEnemyHp}</span>
                 </div>
               </div>
             </div>
