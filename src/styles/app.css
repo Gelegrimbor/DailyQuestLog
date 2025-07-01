@@ -1579,3 +1579,26 @@ body {
   margin-top: 5px;
   display: block;
 }
+
+.floating-damage {
+  position: absolute;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #ff4d4d;
+  animation: floatDamage 0.8s ease-out forwards;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: -30px;
+  pointer-events: none;
+}
+
+@keyframes floatDamage {
+  0% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px) scale(1.2);
+  }
+}

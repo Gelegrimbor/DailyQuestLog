@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import { auth, db } from "../firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function Dashboard() {
   const [selectedDay, setSelectedDay] = useState("Monday");
@@ -12,15 +15,35 @@ export default function Dashboard() {
     Thursday: [], Friday: [], Saturday: [], Sunday: []
   });
 
-  const [enemyHp, setEnemyHp] = useState(100);
-  const maxEnemyHp = 100;
+  const [username, setUsername] = useState("Loading...");
+  const [level, setLevel] = useState(1);
+  const [xp, setXp] = useState(0);
+  const [xpToNextLevel, setXpToNextLevel] = useState(20);
+  const [enemyHp, setEnemyHp] = useState(25);
+  const [maxEnemyHp, setMaxEnemyHp] = useState(25);
+  const [damageDealt, setDamageDealt] = useState(null);
+  const [enemyName, setEnemyName] = useState("Skeleton");
+  const [enemyImage, setEnemyImage] = useState("/images/enemy1.png");
+
+  const damagePerLevel = {
+    1: 5,
+    2: 5,
+    3: 10,
+    4: 10,
+    5: 20,
+  };
+
+  const enemyInfo = {
+    1: { hp: 25, name: "Skeleton", img: "/images/enemy1.png", xp: 20 },
+    2: { hp: 30, name: "Goblin", img: "/images/enemy2.png", xp: 30 },
+    3: { hp: 50, name: "Troll", img: "/images/enemy3.png", xp: 50 },
+    4: { hp: 100, name: "Dragon", img: "/images/enemy4.png", xp: 100 },
+    5: { hp: 500, name: "Demon Lord", img: "/images/enemy5.png", xp: 999 },
+  };
 
   const handleAddTask = () => {
     if (!newTask.trim()) return;
-    setTasks({
-      ...tasks,
-      [selectedDay]: [...tasks[selectedDay], newTask],
-    });
+    setTasks({ ...tasks, [selectedDay]: [...tasks[selectedDay], newTask] });
     setNewTask("");
   };
 
@@ -34,14 +57,48 @@ export default function Dashboard() {
     const task = tasks[selectedDay][index];
     const updatedTasks = [...tasks[selectedDay]];
     const updatedCompleted = [...completedTasks[selectedDay]];
-
     updatedTasks.splice(index, 1);
     updatedCompleted.push(task);
 
     setTasks({ ...tasks, [selectedDay]: updatedTasks });
     setCompletedTasks({ ...completedTasks, [selectedDay]: updatedCompleted });
 
-    setEnemyHp(prev => Math.max(0, prev - 10));
+    const damage = damagePerLevel[level] || 5;
+    setDamageDealt(`-${damage}`);
+    setTimeout(() => setDamageDealt(null), 800);
+
+    setEnemyHp(prev => {
+      const newHp = Math.max(0, prev - damage);
+      if (newHp === 0) {
+        const newLevel = Math.min(level + 1, 5);
+        const newEnemy = enemyInfo[newLevel];
+
+        setLevel(newLevel);
+        setXp(0);
+        setXpToNextLevel(newEnemy.xp);
+        setEnemyHp(newEnemy.hp);
+        setMaxEnemyHp(newEnemy.hp);
+        setEnemyName(newEnemy.name);
+        setEnemyImage(newEnemy.img);
+      } else {
+        const xpGain = damage;
+        const newXp = xp + xpGain;
+        if (newXp >= xpToNextLevel) {
+          const newLevel = Math.min(level + 1, 5);
+          const newEnemy = enemyInfo[newLevel];
+          setLevel(newLevel);
+          setXp(0);
+          setXpToNextLevel(newEnemy.xp);
+          setEnemyHp(newEnemy.hp);
+          setMaxEnemyHp(newEnemy.hp);
+          setEnemyName(newEnemy.name);
+          setEnemyImage(newEnemy.img);
+        } else {
+          setXp(newXp);
+        }
+      }
+      return newHp;
+    });
   };
 
   const handleUncompleteTask = (index) => {
@@ -54,22 +111,30 @@ export default function Dashboard() {
 
     setCompletedTasks({ ...completedTasks, [selectedDay]: updatedCompleted });
     setTasks({ ...tasks, [selectedDay]: updatedTasks });
-
-    setEnemyHp(prev => Math.min(maxEnemyHp, prev + 10));
   };
-
-  const days = [
-    "Monday", "Tuesday", "Wednesday", "Thursday",
-    "Friday", "Saturday", "Sunday"
-  ];
 
   const getCurrentDay = () => {
-    const dayNames = [
-      "Sunday", "Monday", "Tuesday", "Wednesday",
-      "Thursday", "Friday", "Saturday"
-    ];
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     return dayNames[new Date().getDay()];
   };
+
+  // 🔥 Fetch username from Firestore
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          setUsername(data.username || "Adventurer");
+        } else {
+          setUsername("Unknown User");
+        }
+      } else {
+        setUsername("Not logged in");
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     setSelectedDay(getCurrentDay());
@@ -78,12 +143,10 @@ export default function Dashboard() {
   return (
     <div className="dashboard-wrapper">
       <div className="dashboard-container">
-
-        {/* Day Navigation */}
         <div className="day-navigation">
           <h2 className="section-title">Quest Calendar</h2>
           <div className="day-selector">
-            {days.map((day) => (
+            {Object.keys(tasks).map((day) => (
               <button
                 key={day}
                 className={`day-btn ${selectedDay === day ? "active" : ""} ${getCurrentDay() === day ? "today" : ""}`}
@@ -98,14 +161,11 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Main Content */}
         <div className="main-content">
-          {/* Quest Panel */}
           <div className="quest-panel">
             <div className="panel-header">
               <h2 className="quest-title">
-                {selectedDay}'s Quests
-                {getCurrentDay() === selectedDay && <span className="today-badge">Today</span>}
+                {selectedDay}'s Quests {getCurrentDay() === selectedDay && <span className="today-badge">Today</span>}
               </h2>
               <div className="quest-stats">
                 <span className="active-quests">{tasks[selectedDay].length} Active</span>
@@ -119,11 +179,9 @@ export default function Dashboard() {
                 onChange={(e) => setNewTask(e.target.value)}
                 placeholder="Enter a new quest..."
                 className="quest-input"
-                onKeyPress={(e) => e.key === 'Enter' && handleAddTask()}
+                onKeyPress={(e) => e.key === "Enter" && handleAddTask()}
               />
-              <button onClick={handleAddTask} className="quest-add-btn">
-                Add Quest
-              </button>
+              <button onClick={handleAddTask} className="quest-add-btn">Add Quest</button>
             </div>
 
             <div className="quest-section">
@@ -136,7 +194,7 @@ export default function Dashboard() {
                     <li key={i} className="quest-item active">
                       <div className="quest-content">
                         <span className="quest-text">{task}</span>
-                        <span className="quest-reward">+5 XP</span>
+                        <span className="quest-reward">+XP</span>
                       </div>
                       <div className="quest-actions">
                         <button onClick={() => handleCompleteTask(i)} className="quest-complete">✓</button>
@@ -156,7 +214,7 @@ export default function Dashboard() {
                     <li key={i} className="quest-item completed">
                       <div className="quest-content">
                         <span className="quest-text">{task}</span>
-                        <span className="quest-reward completed">+5 XP</span>
+                        <span className="quest-reward completed">+XP</span>
                       </div>
                       <div className="quest-actions">
                         <button onClick={() => handleUncompleteTask(i)} className="quest-undo">↶</button>
@@ -168,38 +226,36 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Right Panel (User + Enemy) */}
           <div className="right-panels">
-            {/* User Panel */}
             <div className="user-panel">
               <div className="character-header">
                 <h2 className="section-title">Your Character</h2>
               </div>
               <div className="character-avatar">
-                <img src="/images/hero.png" alt="User" className="avatar-img" />
+                <img src="/images/user.png" alt="User" className="avatar-img" />
               </div>
-              <h3 className="username">"Username"</h3>
+              <h3 className="username">"{username}"</h3>
               <div className="character-bars">
                 <div className="stat-bar">
-                  <label>Level 1 XP 0 / 20</label>
+                  <label>Level {level}</label>
                   <div className="bar-container">
                     <div className="bar xp-bar">
-                      <div className="bar-fill xp-fill" style={{ width: `0%` }}></div>
+                      <div className="bar-fill xp-fill" style={{ width: `${(xp / xpToNextLevel) * 100}%` }}></div>
                     </div>
+                    <span className="bar-text">{xp} / {xpToNextLevel}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Enemy Panel */}
             <div className="enemy-panel">
               <div className="character-header">
                 <h2 className="section-title">Enemy Encounter</h2>
               </div>
               <div className="character-avatar">
-                <img src="/images/enemy.png" alt="Enemy" className="avatar-img" />
+                <img src={enemyImage} alt="Enemy" className="avatar-img" />
               </div>
-              <h3 className="enemy-name">"Enemy Name"</h3>
+              <h3 className="enemy-name">"{enemyName}"</h3>
               <div className="character-bars">
                 <div className="stat-bar">
                   <label>Health</label>
@@ -207,13 +263,13 @@ export default function Dashboard() {
                     <div className="bar hp-bar">
                       <div className="bar-fill hp-fill" style={{ width: `${(enemyHp / maxEnemyHp) * 100}%` }}></div>
                     </div>
-                    <span className="bar-text">{enemyHp}/{maxEnemyHp}</span>
+                    <span className="bar-text">{enemyHp} / {maxEnemyHp}</span>
                   </div>
                 </div>
               </div>
+              {damageDealt && <div className="floating-damage">{damageDealt}</div>}
             </div>
           </div>
-
         </div>
       </div>
     </div>
