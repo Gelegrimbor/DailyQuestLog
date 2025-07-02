@@ -17,6 +17,10 @@ export default function Dashboard() {
   });
   const [newTask, setNewTask] = useState("");
   const [username, setUsername] = useState("Loading...");
+  const [userCharacter, setUserCharacter] = useState({
+    name: "Knight",
+    img: "/images/hero2.gif"
+  });
   const [level, setLevel] = useState(1);
   const [xp, setXp] = useState(0);
   const [xpToNextLevel, setXpToNextLevel] = useState(20);
@@ -51,9 +55,22 @@ export default function Dashboard() {
       if (user) {
         setUserId(user.uid);
 
-        // Username
+        // Username & Character
         const userDoc = await getDoc(doc(db, "users", user.uid));
-        setUsername(userDoc.exists() ? userDoc.data().username : "Adventurer");
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setUsername(userData.username || "Adventurer");
+          setUserCharacter(userData.character || {
+            name: "Knight",
+            img: "/images/hero2.gif"
+          });
+        } else {
+          setUsername("Adventurer");
+          setUserCharacter({
+            name: "Knight",
+            img: "/images/hero2.gif"
+          });
+        }
 
         // Stats (level/xp/enemyHp)
         const statsRef = doc(db, "users", user.uid, "stats", "progress");
@@ -89,6 +106,10 @@ export default function Dashboard() {
       } else {
         setUserId(null);
         setUsername("Not logged in");
+        setUserCharacter({
+          name: "Knight",
+          img: "/images/hero2.gif"
+        });
       }
     });
     return () => unsubscribe();
@@ -301,8 +322,9 @@ export default function Dashboard() {
                 <h2 className="section-title">Your Character</h2>
               </div>
               <div className="character-avatar">
-                <img src="/images/user.png" alt="User" className="avatar-img" />
+                <img src={userCharacter.img} alt={userCharacter.name} className="avatar-img" />
               </div>
+              <div className="char-name" style={{ color: "#fff", fontWeight: "bold", fontSize: "1.1rem", marginBottom: 2 }}>{userCharacter.name}</div>
               <h3 className="username">{username}</h3>
               <div className="character-bars">
                 <div className="stat-bar">
@@ -321,7 +343,7 @@ export default function Dashboard() {
                 <h2 className="section-title">Enemy Encounter</h2>
               </div>
               <div className="character-avatar">
-                <img src={enemyImage} alt="Enemy" className="avatar-img" />
+                <img src={enemyImage} alt={enemyName} className="avatar-img" />
               </div>
               <h3 className="enemy-name">{enemyName}</h3>
               <div className="character-bars">
