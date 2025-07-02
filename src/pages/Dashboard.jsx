@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { auth, db } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  doc, getDoc, setDoc, updateDoc
+} from "firebase/firestore";
 
 export default function Dashboard() {
   const [selectedDay, setSelectedDay] = useState("Monday");
@@ -9,12 +11,11 @@ export default function Dashboard() {
     Monday: [], Tuesday: [], Wednesday: [],
     Thursday: [], Friday: [], Saturday: [], Sunday: []
   });
-  const [newTask, setNewTask] = useState("");
   const [completedTasks, setCompletedTasks] = useState({
     Monday: [], Tuesday: [], Wednesday: [],
     Thursday: [], Friday: [], Saturday: [], Sunday: []
   });
-
+  const [newTask, setNewTask] = useState("");
   const [username, setUsername] = useState("Loading...");
   const [level, setLevel] = useState(1);
   const [xp, setXp] = useState(0);
@@ -26,7 +27,9 @@ export default function Dashboard() {
   const [enemyImage, setEnemyImage] = useState("/images/enemy1.gif");
   const [userId, setUserId] = useState(null);
 
-  const damagePerLevel = { 1: 5, 2: 5, 3: 10, 4: 10, 5: 20 };
+  const damagePerLevel = {
+    1: 5, 2: 5, 3: 10, 4: 10, 5: 20,
+  };
 
   const enemyInfo = {
     1: { hp: 25, name: "Skeleton", img: "/images/enemy1.gif", xp: 20 },
@@ -36,151 +39,23 @@ export default function Dashboard() {
     5: { hp: 500, name: "Demon Lord", img: "/images/enemy5.gif", xp: 999 },
   };
 
-  // --- Firestore Save/Load Tasks ---
-  // Save tasks to Firestore
-  const saveTasks = async (newTasks, newCompleted) => {
-    if (!userId) return;
-    await setDoc(doc(db, "users", userId, "tasks", "days"), newTasks);
-    await setDoc(doc(db, "users", userId, "tasks", "completed"), newCompleted);
-  };
+  // --- Firestore helpers ---
+  const getTasksRef = (docName) =>
+    userId ? doc(db, "users", userId, "tasks", docName) : null;
+  const getStatsRef = () =>
+    userId ? doc(db, "users", userId, "stats", "progress") : null;
 
-  // Fetch tasks from Firestore
-  const fetchTasks = async (uid) => {
-    const tasksRef = doc(db, "users", uid, "tasks", "days");
-    const completedRef = doc(db, "users", uid, "tasks", "completed");
-    let userTasks = {
-      Monday: [], Tuesday: [], Wednesday: [],
-      Thursday: [], Friday: [], Saturday: [], Sunday: []
-    };
-    let userCompleted = {
-      Monday: [], Tuesday: [], Wednesday: [],
-      Thursday: [], Friday: [], Saturday: [], Sunday: []
-    };
-    const tasksSnap = await getDoc(tasksRef);
-    if (tasksSnap.exists()) userTasks = { ...userTasks, ...tasksSnap.data() };
-    const completedSnap = await getDoc(completedRef);
-    if (completedSnap.exists()) userCompleted = { ...userCompleted, ...completedSnap.data() };
-    setTasks(userTasks);
-    setCompletedTasks(userCompleted);
-  };
-
-  // --- XP/ENEMY FIRESTORE SYNC ---
-
-  const saveStats = async (newLevel, newXp, newEnemyHp, newMaxHp) => {
-    if (!userId) return;
-    await setDoc(
-      doc(db, "users", userId, "stats", "progress"),
-      {
-        level: newLevel,
-        xp: newXp,
-        enemyHp: newEnemyHp,
-        maxEnemyHp: newMaxHp
-      },
-      { merge: true }
-    );
-  };
-
-  // --- QUEST PANEL LOGIC ---
-
-  const handleAddTask = async () => {
-    if (!newTask.trim()) return;
-    const updatedTasks = { ...tasks, [selectedDay]: [...tasks[selectedDay], newTask] };
-    setTasks(updatedTasks);
-    setNewTask("");
-    await saveTasks(updatedTasks, completedTasks);
-  };
-
-  const handleDeleteTask = async (index) => {
-    const updated = [...tasks[selectedDay]];
-    updated.splice(index, 1);
-    const updatedTasks = { ...tasks, [selectedDay]: updated };
-    setTasks(updatedTasks);
-    await saveTasks(updatedTasks, completedTasks);
-  };
-
-  const handleCompleteTask = async (index) => {
-    const task = tasks[selectedDay][index];
-    const updatedTasks = [...tasks[selectedDay]];
-    const updatedCompleted = [...completedTasks[selectedDay]];
-    updatedTasks.splice(index, 1);
-    updatedCompleted.push(task);
-
-    const allTasks = { ...tasks, [selectedDay]: updatedTasks };
-    const allCompleted = { ...completedTasks, [selectedDay]: updatedCompleted };
-
-    setTasks(allTasks);
-    setCompletedTasks(allCompleted);
-    await saveTasks(allTasks, allCompleted);
-
-    // Damage + Progress logic
-    const damage = damagePerLevel[level] || 5;
-    setDamageDealt(`-${damage}`);
-    setTimeout(() => setDamageDealt(null), 800);
-
-    setEnemyHp(prev => {
-      const newHp = Math.max(0, prev - damage);
-      if (newHp === 0) {
-        const newLevel = Math.min(level + 1, 5);
-        const newEnemy = enemyInfo[newLevel];
-        setLevel(newLevel);
-        setXp(0);
-        setXpToNextLevel(newEnemy.xp);
-        setEnemyHp(newEnemy.hp);
-        setMaxEnemyHp(newEnemy.hp);
-        setEnemyName(newEnemy.name);
-        setEnemyImage(newEnemy.img);
-        saveStats(newLevel, 0, newEnemy.hp, newEnemy.hp);
-      } else {
-        const xpGain = damage;
-        const newXp = xp + xpGain;
-        if (newXp >= xpToNextLevel) {
-          const newLevel = Math.min(level + 1, 5);
-          const newEnemy = enemyInfo[newLevel];
-          setLevel(newLevel);
-          setXp(0);
-          setXpToNextLevel(newEnemy.xp);
-          setEnemyHp(newEnemy.hp);
-          setMaxEnemyHp(newEnemy.hp);
-          setEnemyName(newEnemy.name);
-          setEnemyImage(newEnemy.img);
-          saveStats(newLevel, 0, newEnemy.hp, newEnemy.hp);
-        } else {
-          setXp(newXp);
-          saveStats(level, newXp, newHp, maxEnemyHp);
-        }
-      }
-      return newHp;
-    });
-  };
-
-  const handleUncompleteTask = async (index) => {
-    const task = completedTasks[selectedDay][index];
-    const updatedCompleted = [...completedTasks[selectedDay]];
-    const updatedTasks = [...tasks[selectedDay]];
-    updatedCompleted.splice(index, 1);
-    updatedTasks.push(task);
-
-    const allTasks = { ...tasks, [selectedDay]: updatedTasks };
-    const allCompleted = { ...completedTasks, [selectedDay]: updatedCompleted };
-
-    setCompletedTasks(allCompleted);
-    setTasks(allTasks);
-    await saveTasks(allTasks, allCompleted);
-  };
-
-  const getCurrentDay = () => {
-    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    return dayNames[new Date().getDay()];
-  };
-
-  // --- FIRESTORE LOAD ON LOGIN ---
-
+  // --- Load user and data on mount ---
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUserId(user.uid);
 
-        // Load XP/level/enemy stats
+        // Username
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        setUsername(userDoc.exists() ? userDoc.data().username : "Adventurer");
+
+        // Stats (level/xp/enemyHp)
         const statsRef = doc(db, "users", user.uid, "stats", "progress");
         const statsSnap = await getDoc(statsRef);
         if (statsSnap.exists()) {
@@ -193,36 +68,152 @@ export default function Dashboard() {
           setEnemyName(enemy.name);
           setEnemyImage(enemy.img);
           setXpToNextLevel(enemy.xp);
+        } else {
+          // Create doc if doesn't exist
+          await setDoc(statsRef, {
+            level: 1, xp: 0, enemyHp: 25, maxEnemyHp: 25
+          });
         }
 
-        // Load username
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) setUsername(userDoc.data().username || "Adventurer");
-        else setUsername("Unknown User");
-
-        // Load tasks
-        await fetchTasks(user.uid);
+        // Tasks
+        const daysSnap = await getDoc(getTasksRef("days"));
+        const completedSnap = await getDoc(getTasksRef("completed"));
+        setTasks(daysSnap.exists() ? daysSnap.data() : {
+          Monday: [], Tuesday: [], Wednesday: [],
+          Thursday: [], Friday: [], Saturday: [], Sunday: []
+        });
+        setCompletedTasks(completedSnap.exists() ? completedSnap.data() : {
+          Monday: [], Tuesday: [], Wednesday: [],
+          Thursday: [], Friday: [], Saturday: [], Sunday: []
+        });
       } else {
         setUserId(null);
         setUsername("Not logged in");
-        setTasks({
-          Monday: [], Tuesday: [], Wednesday: [],
-          Thursday: [], Friday: [], Saturday: [], Sunday: []
-        });
-        setCompletedTasks({
-          Monday: [], Tuesday: [], Wednesday: [],
-          Thursday: [], Friday: [], Saturday: [], Sunday: []
-        });
       }
     });
     return () => unsubscribe();
     // eslint-disable-next-line
   }, []);
 
+  // --- Save tasks to Firestore on change ---
   useEffect(() => {
-    setSelectedDay(getCurrentDay());
+    if (!userId) return;
+    updateDoc(getTasksRef("days"), tasks).catch(() => setDoc(getTasksRef("days"), tasks));
+    // eslint-disable-next-line
+  }, [tasks, userId]);
+  useEffect(() => {
+    if (!userId) return;
+    updateDoc(getTasksRef("completed"), completedTasks).catch(() =>
+      setDoc(getTasksRef("completed"), completedTasks));
+    // eslint-disable-next-line
+  }, [completedTasks, userId]);
+
+  // --- Task Handlers ---
+  const handleAddTask = () => {
+    if (!newTask.trim()) return;
+    setTasks((prev) => ({
+      ...prev,
+      [selectedDay]: [...prev[selectedDay], newTask]
+    }));
+    setNewTask("");
+  };
+
+  const handleDeleteTask = (idx) => {
+    setTasks((prev) => ({
+      ...prev,
+      [selectedDay]: prev[selectedDay].filter((_, i) => i !== idx)
+    }));
+  };
+
+  const handleCompleteTask = (idx) => {
+    const task = tasks[selectedDay][idx];
+    setTasks((prev) => ({
+      ...prev,
+      [selectedDay]: prev[selectedDay].filter((_, i) => i !== idx)
+    }));
+    setCompletedTasks((prev) => ({
+      ...prev,
+      [selectedDay]: [...prev[selectedDay], task]
+    }));
+
+    // XP/Enemy system:
+    const damage = damagePerLevel[level] || 5;
+    setDamageDealt(`-${damage}`);
+    setTimeout(() => setDamageDealt(null), 800);
+
+    // XP/Level/Enemy progress update
+    setEnemyHp((prevHp) => {
+      let newHp = Math.max(0, prevHp - damage);
+      let newXp = xp + damage;
+      let newLevel = level;
+      let newEnemy = enemyInfo[level];
+      let newMaxHp = maxEnemyHp;
+
+      if (newHp <= 0) {
+        newLevel = Math.min(level + 1, 5);
+        newEnemy = enemyInfo[newLevel];
+        newHp = newEnemy.hp;
+        newMaxHp = newEnemy.hp;
+        newXp = 0;
+        setLevel(newLevel);
+        setEnemyName(newEnemy.name);
+        setEnemyImage(newEnemy.img);
+        setXpToNextLevel(newEnemy.xp);
+      } else if (newXp >= xpToNextLevel) {
+        newLevel = Math.min(level + 1, 5);
+        newEnemy = enemyInfo[newLevel];
+        newHp = newEnemy.hp;
+        newMaxHp = newEnemy.hp;
+        newXp = 0;
+        setLevel(newLevel);
+        setEnemyName(newEnemy.name);
+        setEnemyImage(newEnemy.img);
+        setXpToNextLevel(newEnemy.xp);
+      }
+      setXp(newXp);
+      setMaxEnemyHp(newMaxHp);
+
+      // SAVE PROGRESS TO FIRESTORE
+      if (userId) {
+        updateDoc(getStatsRef(), {
+          level: newLevel,
+          xp: newXp,
+          enemyHp: newHp,
+          maxEnemyHp: newMaxHp
+        }).catch(() =>
+          setDoc(getStatsRef(), {
+            level: newLevel,
+            xp: newXp,
+            enemyHp: newHp,
+            maxEnemyHp: newMaxHp
+          })
+        );
+      }
+      return newHp;
+    });
+  };
+
+  const handleUncompleteTask = (idx) => {
+    const task = completedTasks[selectedDay][idx];
+    setCompletedTasks((prev) => ({
+      ...prev,
+      [selectedDay]: prev[selectedDay].filter((_, i) => i !== idx)
+    }));
+    setTasks((prev) => ({
+      ...prev,
+      [selectedDay]: [...prev[selectedDay], task]
+    }));
+  };
+
+  // --- Init selected day on mount
+  useEffect(() => {
+    const dayNames = [
+      "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+    ];
+    setSelectedDay(dayNames[new Date().getDay()]);
   }, []);
 
+  // --- UI ---
   return (
     <div className="dashboard-wrapper">
       <div className="dashboard-container">
@@ -232,7 +223,7 @@ export default function Dashboard() {
             {Object.keys(tasks).map((day) => (
               <button
                 key={day}
-                className={`day-btn ${selectedDay === day ? "active" : ""} ${getCurrentDay() === day ? "today" : ""}`}
+                className={`day-btn ${selectedDay === day ? "active" : ""} ${new Date().toLocaleDateString("en-US", { weekday: "long" }) === day ? "today" : ""}`}
                 onClick={() => setSelectedDay(day)}
               >
                 <span className="day-name">{day.slice(0, 3)}</span>
@@ -243,19 +234,17 @@ export default function Dashboard() {
             ))}
           </div>
         </div>
-
         <div className="main-content">
           <div className="quest-panel">
             <div className="panel-header">
               <h2 className="quest-title">
-                {selectedDay}'s Quests {getCurrentDay() === selectedDay && <span className="today-badge">Today</span>}
+                {selectedDay}'s Quests {new Date().toLocaleDateString("en-US", { weekday: "long" }) === selectedDay && <span className="today-badge">Today</span>}
               </h2>
               <div className="quest-stats">
                 <span className="active-quests">{tasks[selectedDay].length} Active</span>
                 <span className="completed-quests">{completedTasks[selectedDay].length} Completed</span>
               </div>
             </div>
-
             <div className="add-quest">
               <input
                 value={newTask}
@@ -266,7 +255,6 @@ export default function Dashboard() {
               />
               <button onClick={handleAddTask} className="quest-add-btn">Add Quest</button>
             </div>
-
             <div className="quest-section">
               <h3 className="quest-section-title">Active Quests</h3>
               <ul className="quest-list">
@@ -288,7 +276,6 @@ export default function Dashboard() {
                 )}
               </ul>
             </div>
-
             {completedTasks[selectedDay].length > 0 && (
               <div className="quest-section">
                 <h3 className="quest-section-title">Completed Quests</h3>
@@ -308,7 +295,6 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-
           <div className="right-panels">
             <div className="user-panel">
               <div className="character-header">
@@ -330,7 +316,6 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-
             <div className="enemy-panel">
               <div className="character-header">
                 <h2 className="section-title">Enemy Encounter</h2>
