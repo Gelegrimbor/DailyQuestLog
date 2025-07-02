@@ -26,18 +26,18 @@ export default function Dashboard() {
   const [enemyImage, setEnemyImage] = useState("/images/enemy1.png");
 
   const damagePerLevel = {
-    1: 5, 2: 5, 3: 10, 4: 10, 5: 20,
+    1: 2, 2: 5, 3: 10, 4: 10, 5: 20,
   };
 
   const enemyInfo = {
-    1: { hp: 25, name: "Skeleton", img: "/images/enemy1.png", xp: 20 },
-    2: { hp: 30, name: "Goblin", img: "/images/enemy2.png", xp: 30 },
-    3: { hp: 50, name: "Troll", img: "/images/enemy3.png", xp: 50 },
-    4: { hp: 100, name: "Dragon", img: "/images/enemy4.png", xp: 100 },
-    5: { hp: 500, name: "Demon Lord", img: "/images/enemy5.png", xp: 999 },
+    1: { hp: 20, name: "Skeleton", img: "/images/enemy1.gif", xp: 20 },
+    2: { hp: 30, name: "Goblin", img: "/images/enemy2.gif", xp: 30 },
+    3: { hp: 50, name: "Troll", img: "/images/enemy3.gif", xp: 50 },
+    4: { hp: 100, name: "Dragon", img: "/images/enemy4.gif", xp: 100 },
+    5: { hp: 5000, name: "Demon Lord", img: "/images/enemy5.gif", xp: 999 },
   };
 
-  // Firestore progress sync (XP/level/enemy)
+  // --- Firestore SAVE functions ---
   const saveStats = async (newLevel, newXp, newEnemyHp, newMaxHp) => {
     const user = auth.currentUser;
     if (!user) return;
@@ -50,16 +50,31 @@ export default function Dashboard() {
     });
   };
 
+  const saveTasksToFirestore = async (newTasks, newCompletedTasks) => {
+    const user = auth.currentUser;
+    if (!user) return;
+    const tasksRef = doc(db, "users", user.uid, "tasks", "progress");
+    await setDoc(tasksRef, {
+      tasks: newTasks,
+      completedTasks: newCompletedTasks
+    });
+  };
+
+  // --- QUEST HANDLERS WITH SAVE ---
   const handleAddTask = () => {
     if (!newTask.trim()) return;
-    setTasks({ ...tasks, [selectedDay]: [...tasks[selectedDay], newTask] });
+    const updatedTasks = { ...tasks, [selectedDay]: [...tasks[selectedDay], newTask] };
+    setTasks(updatedTasks);
     setNewTask("");
+    saveTasksToFirestore(updatedTasks, completedTasks);
   };
 
   const handleDeleteTask = (index) => {
     const updated = [...tasks[selectedDay]];
     updated.splice(index, 1);
-    setTasks({ ...tasks, [selectedDay]: updated });
+    const updatedTasks = { ...tasks, [selectedDay]: updated };
+    setTasks(updatedTasks);
+    saveTasksToFirestore(updatedTasks, completedTasks);
   };
 
   const handleCompleteTask = (index) => {
@@ -68,9 +83,12 @@ export default function Dashboard() {
     const updatedCompleted = [...completedTasks[selectedDay]];
     updatedTasks.splice(index, 1);
     updatedCompleted.push(task);
+    const updatedTasksObj = { ...tasks, [selectedDay]: updatedTasks };
+    const updatedCompletedObj = { ...completedTasks, [selectedDay]: updatedCompleted };
 
-    setTasks({ ...tasks, [selectedDay]: updatedTasks });
-    setCompletedTasks({ ...completedTasks, [selectedDay]: updatedCompleted });
+    setTasks(updatedTasksObj);
+    setCompletedTasks(updatedCompletedObj);
+    saveTasksToFirestore(updatedTasksObj, updatedCompletedObj);
 
     const damage = damagePerLevel[level] || 5;
     setDamageDealt(`-${damage}`);
@@ -79,7 +97,6 @@ export default function Dashboard() {
     setEnemyHp(prev => {
       const newHp = Math.max(0, prev - damage);
       if (newHp === 0) {
-        // Enemy defeated: Level up!
         const newLevel = Math.min(level + 1, 5);
         const newEnemy = enemyInfo[newLevel];
         setLevel(newLevel);
@@ -89,13 +106,11 @@ export default function Dashboard() {
         setMaxEnemyHp(newEnemy.hp);
         setEnemyName(newEnemy.name);
         setEnemyImage(newEnemy.img);
-        // Save to Firestore
         saveStats(newLevel, 0, newEnemy.hp, newEnemy.hp);
       } else {
         const xpGain = damage;
         const newXp = xp + xpGain;
         if (newXp >= xpToNextLevel) {
-          // XP overflow: Level up!
           const newLevel = Math.min(level + 1, 5);
           const newEnemy = enemyInfo[newLevel];
           setLevel(newLevel);
@@ -105,7 +120,6 @@ export default function Dashboard() {
           setMaxEnemyHp(newEnemy.hp);
           setEnemyName(newEnemy.name);
           setEnemyImage(newEnemy.img);
-          // Save to Firestore
           saveStats(newLevel, 0, newEnemy.hp, newEnemy.hp);
         } else {
           setXp(newXp);
@@ -123,8 +137,11 @@ export default function Dashboard() {
     updatedCompleted.splice(index, 1);
     updatedTasks.push(task);
 
-    setCompletedTasks({ ...completedTasks, [selectedDay]: updatedCompleted });
-    setTasks({ ...tasks, [selectedDay]: updatedTasks });
+    const updatedCompletedObj = { ...completedTasks, [selectedDay]: updatedCompleted };
+    const updatedTasksObj = { ...tasks, [selectedDay]: updatedTasks };
+    setCompletedTasks(updatedCompletedObj);
+    setTasks(updatedTasksObj);
+    saveTasksToFirestore(updatedTasksObj, updatedCompletedObj);
   };
 
   const getCurrentDay = () => {
@@ -132,17 +149,18 @@ export default function Dashboard() {
     return dayNames[new Date().getDay()];
   };
 
-  // Fetch username and XP/level/enemy from Firestore
+  // --- Firestore LOAD on mount/login ---
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        // Username
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
           setUsername(userDoc.data().username || "Adventurer");
         } else {
           setUsername("Unknown User");
         }
-        // Get stats/progress
+        // Stats/progress (XP, enemy, etc)
         const statsRef = doc(db, "users", user.uid, "stats", "progress");
         const statsSnap = await getDoc(statsRef);
 
@@ -165,11 +183,26 @@ export default function Dashboard() {
             maxEnemyHp: 25
           });
         }
+        // Tasks/progress
+        const tasksRef = doc(db, "users", user.uid, "tasks", "progress");
+        const tasksSnap = await getDoc(tasksRef);
+        if (tasksSnap.exists()) {
+          const data = tasksSnap.data();
+          setTasks(data.tasks || {
+            Monday: [], Tuesday: [], Wednesday: [],
+            Thursday: [], Friday: [], Saturday: [], Sunday: []
+          });
+          setCompletedTasks(data.completedTasks || {
+            Monday: [], Tuesday: [], Wednesday: [],
+            Thursday: [], Friday: [], Saturday: [], Sunday: []
+          });
+        }
       } else {
         setUsername("Not logged in");
       }
     });
     return () => unsubscribe();
+  // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
