@@ -234,7 +234,7 @@ export default function Dashboard() {
               <div className="character-avatar">
                 <img src="/images/user.png" alt="User" className="avatar-img" />
               </div>
-              <h3 className="username">"{username}"</h3>
+              <h3 className="username">{username}</h3>
               <div className="character-bars">
                 <div className="stat-bar">
                   <label>Level {level}</label>
@@ -242,8 +242,8 @@ export default function Dashboard() {
                     <div className="bar xp-bar">
                       <div className="bar-fill xp-fill" style={{ width: `${(xp / xpToNextLevel) * 100}%` }}></div>
                     </div>
-                    <span className="bar-text">{xp} / {xpToNextLevel}</span>
                   </div>
+                  <span className="bar-text">{xp} / {xpToNextLevel}</span>
                 </div>
               </div>
             </div>
@@ -255,7 +255,7 @@ export default function Dashboard() {
               <div className="character-avatar">
                 <img src={enemyImage} alt="Enemy" className="avatar-img" />
               </div>
-              <h3 className="enemy-name">"{enemyName}"</h3>
+              <h3 className="enemy-name">{enemyName}</h3>
               <div className="character-bars">
                 <div className="stat-bar">
                   <label>Health</label>
@@ -263,8 +263,8 @@ export default function Dashboard() {
                     <div className="bar hp-bar">
                       <div className="bar-fill hp-fill" style={{ width: `${(enemyHp / maxEnemyHp) * 100}%` }}></div>
                     </div>
-                    <span className="bar-text">{enemyHp} / {maxEnemyHp}</span>
                   </div>
+                  <span className="bar-text">{enemyHp} / {maxEnemyHp}</span>
                 </div>
               </div>
               {damageDealt && <div className="floating-damage">{damageDealt}</div>}
