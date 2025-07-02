@@ -42,13 +42,13 @@ export default function SetUsername() {
 
   return (
     <div
-      className="flex flex-col items-center justify-center min-h-screen"
+      className="min-h-screen flex items-center justify-center"
       style={{
         background: "radial-gradient(ellipse at 50% 0, #23243b 80%, #151625 100%)",
       }}
     >
-      <div className="bg-[#181926] rounded-3xl p-10 shadow-2xl flex flex-col items-center w-[430px]">
-        <h2 className="text-3xl font-bold text-white mb-6 text-center">
+      <div className="bg-[#181926] rounded-3xl p-8 shadow-2xl flex flex-col items-center max-w-md w-full">
+        <h2 className="text-3xl font-bold text-white mb-5 text-center">
           Set Your Username
         </h2>
         <input
@@ -58,61 +58,53 @@ export default function SetUsername() {
           onChange={(e) => setUsername(e.target.value)}
           maxLength={18}
         />
-        <div className="flex flex-col items-center w-full mb-2">
-          <div className="relative flex flex-row items-center w-full justify-center">
+        {/* Character select carousel */}
+        <div className="flex flex-col items-center w-full mb-1">
+          <div className="flex items-center justify-center">
             <button
               aria-label="Prev"
               onClick={prev}
-              className="absolute left-0 ml-[-60px] text-3xl text-orange-400 hover:text-orange-200 transition select-none z-10"
+              className="text-3xl text-orange-400 hover:text-orange-200 rounded-full w-10 h-10 flex items-center justify-center transition"
               tabIndex={0}
-              style={{ outline: "none" }}
             >
               &#8592;
             </button>
             <div
-              className="flex flex-col items-center justify-center w-[170px] h-[170px] mx-12 bg-[#23243b] rounded-2xl border-4"
+              className="flex flex-col items-center justify-center mx-6 bg-[#23243b] rounded-2xl border-4"
               style={{
-                borderColor:
-                  "linear-gradient(90deg, #FFB800 0%, #FF5F6D 100%)",
-                boxShadow:
-                  selected === 0
-                    ? "0 0 0 4px #FFB800, 0 0 12px 0 #FF5F6D"
-                    : "0 0 16px 0 #23243b",
-                border: selected === 0
-                  ? "4px solid #FFB800"
-                  : "4px solid #2e2f43",
-                transition: "border 0.2s",
+                borderColor: "#FFB800",
+                boxShadow: selected === 0 ? "0 0 8px 1px #FFB800" : "",
+                width: "180px",
+                height: "180px",
+                overflow: "hidden"
               }}
             >
               <img
                 src={characterOptions[selected].img}
                 alt={characterOptions[selected].name}
-                className="w-28 h-28 object-contain pointer-events-none"
+                className="object-contain"
+                style={{ width: "150px", height: "150px", imageRendering: "pixelated" }}
                 draggable={false}
-                style={{
-                  filter:
-                    "drop-shadow(0 0 8px #FFB80070) drop-shadow(0 0 20px #23243b70)",
-                }}
               />
             </div>
             <button
               aria-label="Next"
               onClick={next}
-              className="absolute right-0 mr-[-60px] text-3xl text-orange-400 hover:text-orange-200 transition select-none z-10"
+              className="text-3xl text-orange-400 hover:text-orange-200 rounded-full w-10 h-10 flex items-center justify-center transition"
               tabIndex={0}
             >
               &#8594;
             </button>
           </div>
-          <div className="mt-5 text-xl font-bold text-white tracking-wide">
+          <div className="mt-3 text-xl font-bold text-white tracking-wide">
             {characterOptions[selected].name}
           </div>
         </div>
-        <div className="mb-7 mt-2 text-orange-400 font-medium text-lg text-center">
+        <div className="mb-5 mt-1 text-orange-400 font-medium text-lg text-center">
           Choose your character
         </div>
         <button
-          className="mt-2 bg-[#6C5DD3] hover:bg-[#5145a9] text-white font-bold py-2 px-8 rounded-xl text-lg transition shadow-xl"
+          className="mt-2 bg-[#6C5DD3] hover:bg-[#5145a9] text-white font-bold py-2 px-8 rounded-xl text-lg transition shadow-xl w-full"
           onClick={handleContinue}
           disabled={!username.trim()}
         >
