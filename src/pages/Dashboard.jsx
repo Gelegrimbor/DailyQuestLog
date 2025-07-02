@@ -28,7 +28,7 @@ export default function Dashboard() {
   const [userId, setUserId] = useState(null);
 
   const damagePerLevel = {
-    1: 5, 2: 5, 3: 10, 4: 10, 5: 20,
+    1: 2, 2: 5, 3: 10, 4: 10, 5: 20,
   };
 
   const enemyInfo = {
@@ -36,7 +36,7 @@ export default function Dashboard() {
     2: { hp: 30, name: "Goblin", img: "/images/enemy2.gif", xp: 30 },
     3: { hp: 50, name: "Troll", img: "/images/enemy3.gif", xp: 50 },
     4: { hp: 100, name: "Dragon", img: "/images/enemy4.gif", xp: 100 },
-    5: { hp: 500, name: "Demon Lord", img: "/images/enemy5.gif", xp: 999 },
+    5: { hp: 5000, name: "Demon Lord", img: "/images/enemy5.gif", xp: 999 },
   };
 
   // --- Firestore helpers ---
