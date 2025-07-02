@@ -19,7 +19,7 @@ export default function SetUsername() {
 
   const handleContinue = async () => {
     if (!username.trim()) {
-      setError("Enter a username!");
+      setError("Please enter a username!");
       return;
     }
     setError("");
@@ -37,131 +37,74 @@ export default function SetUsername() {
     }
   };
 
-  const next = () => setSelected((prev) => (prev + 1) % characterOptions.length);
-  const prev = () => setSelected((prev) => (prev - 1 + characterOptions.length) % characterOptions.length);
+  const next = () =>
+    setSelected((prev) => (prev + 1) % characterOptions.length);
+  const prev = () =>
+    setSelected((prev) => (prev - 1 + characterOptions.length) % characterOptions.length);
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{
-        background: "radial-gradient(ellipse at 50% 0, #23243b 80%, #151625 100%)",
-      }}
-    >
-      <div className="bg-[#181926] rounded-3xl p-8 shadow-2xl flex flex-col items-center max-w-lg w-full">
-        {/* Header */}
-        <h2 className="text-3xl font-bold text-white mb-6 text-center">
-          Set Your Username
-        </h2>
-
+    <div className="username-container">
+      <div className="username-panel">
+        {/* Title */}
+        <div className="username-title">Set Your Username</div>
         {/* Username Input */}
         <input
-          className="w-full mb-6 px-4 py-3 rounded-xl bg-[#23243b] text-lg text-white border-none outline-none focus:ring-2 focus:ring-orange-400 transition placeholder-white/50"
+          className="username-input"
           placeholder="Enter a username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           maxLength={18}
         />
-
         {/* Character Selection */}
-        <div className="flex flex-col items-center w-full mb-6">
-          <h3 className="text-xl text-orange-400 font-medium mb-4">
-            Choose your character
-          </h3>
-          
-          {/* Character Carousel */}
-          <div className="flex items-center justify-center mb-4">
-            {/* Left Arrow */}
-            <button
-              onClick={prev}
-              className="text-4xl text-orange-400 hover:text-orange-200 transition-colors duration-200 mr-6 w-12 h-12 flex items-center justify-center rounded-full hover:bg-[#23243b]"
-              aria-label="Previous character"
-            >
-              ←
-            </button>
-
-            {/* Character Display Box */}
-            <div
-              className="bg-[#23243b] rounded-2xl border-4 border-[#FFB800] flex items-center justify-center overflow-hidden"
-              style={{
-                width: "300px",
-                height: "300px",
-                boxShadow: "0 0 15px 2px rgba(255, 184, 0, 0.3)"
+        <div className="char-select-title">Choose your character</div>
+        <div className="char-carousel">
+          <button
+            className="char-arrow"
+            onClick={prev}
+            aria-label="Previous Character"
+            type="button"
+          >
+            &#8592;
+          </button>
+          <div className="char-image-box">
+            <img
+              src={characterOptions[selected].img}
+              alt={characterOptions[selected].name}
+              draggable={false}
+              onError={e => {
+                e.target.style.display = "none";
               }}
-            >
-              <img
-                src={characterOptions[selected].img}
-                alt={characterOptions[selected].name}
-                className="object-contain max-w-full max-h-full"
-                style={{ 
-                  imageRendering: "pixelated",
-                  width: "250px",
-                  height: "250px"
-                }}
-                draggable={false}
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'flex';
-                }}
-              />
-              {/* Fallback if image doesn't load */}
-              <div 
-                className="w-full h-full bg-[#2a2b42] rounded-lg flex items-center justify-center text-white/60 text-lg font-medium hidden"
-              >
-                {characterOptions[selected].name}
-              </div>
-            </div>
-
-            {/* Right Arrow */}
-            <button
-              onClick={next}
-              className="text-4xl text-orange-400 hover:text-orange-200 transition-colors duration-200 ml-6 w-12 h-12 flex items-center justify-center rounded-full hover:bg-[#23243b]"
-              aria-label="Next character"
-            >
-              →
-            </button>
+            />
           </div>
-
-          {/* Character Name */}
-          <div className="text-2xl font-bold text-white mb-3 text-center">
-            {characterOptions[selected].name}
-          </div>
-
-          {/* Dot Indicators */}
-          <div className="flex space-x-2">
-            {characterOptions.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setSelected(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                  index === selected 
-                    ? 'bg-orange-400 scale-125' 
-                    : 'bg-white/30 hover:bg-white/50'
-                }`}
-                aria-label={`Select ${characterOptions[index].name}`}
-              />
-            ))}
-          </div>
+          <button
+            className="char-arrow"
+            onClick={next}
+            aria-label="Next Character"
+            type="button"
+          >
+            &#8594;
+          </button>
         </div>
-
-        {/* Continue Button */}
+        <div className="char-name">{characterOptions[selected].name}</div>
+        <div className="char-dots">
+          {characterOptions.map((_, i) => (
+            <div
+              key={i}
+              className={`char-dot${i === selected ? " active" : ""}`}
+              aria-label={characterOptions[i].name}
+            />
+          ))}
+        </div>
+        {/* Continue/Start Button */}
         <button
-          className={`w-full py-3 px-8 rounded-xl text-lg font-bold transition-all duration-200 ${
-            username.trim()
-              ? 'bg-[#6C5DD3] hover:bg-[#5145a9] text-white shadow-xl hover:shadow-2xl transform hover:scale-[1.02]'
-              : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-          }`}
-          onClick={handleContinue}
+          className="username-continue-btn"
           disabled={!username.trim()}
+          onClick={handleContinue}
+          type="button"
         >
-          Continue
+          Start Journey
         </button>
-
-        {/* Error Message */}
-        {error && (
-          <div className="text-red-400 mt-4 font-medium text-base text-center">
-            {error}
-          </div>
-        )}
+        {error && <div className="username-error">{error}</div>}
       </div>
     </div>
   );
