@@ -146,10 +146,16 @@ export default function Dashboard() {
   // --- Task Handlers ---
   const handleAddTask = () => {
     if (!newTask.trim()) return;
-    setTasks((prev) => ({
-      ...prev,
-      [selectedDay]: [...prev[selectedDay], newTask]
-    }));
+    const updated = {
+      ...tasks,
+      [selectedDay]: [...tasks[selectedDay], newTask]
+    };
+    setTasks(updated);
+    if (userId) {
+      updateDoc(getTasksRef("days"), { [selectedDay]: updated[selectedDay] }).catch(
+        () => setDoc(getTasksRef("days"), updated)
+      );
+    }
     setNewTask("");
   };
 
@@ -162,14 +168,24 @@ export default function Dashboard() {
 
   const handleCompleteTask = (idx) => {
     const task = tasks[selectedDay][idx];
-    setTasks((prev) => ({
-      ...prev,
-      [selectedDay]: prev[selectedDay].filter((_, i) => i !== idx)
-    }));
-    setCompletedTasks((prev) => ({
-      ...prev,
-      [selectedDay]: [...prev[selectedDay], task]
-    }));
+    const updatedTasks = {
+      ...tasks,
+      [selectedDay]: tasks[selectedDay].filter((_, i) => i !== idx)
+    };
+    const updatedCompleted = {
+      ...completedTasks,
+      [selectedDay]: [...completedTasks[selectedDay], task]
+    };
+    setTasks(updatedTasks);
+    setCompletedTasks(updatedCompleted);
+    if (userId) {
+      updateDoc(getTasksRef("days"), { [selectedDay]: updatedTasks[selectedDay] }).catch(
+        () => setDoc(getTasksRef("days"), updatedTasks)
+      );
+      updateDoc(getTasksRef("completed"), {
+        [selectedDay]: updatedCompleted[selectedDay]
+      }).catch(() => setDoc(getTasksRef("completed"), updatedCompleted));
+    }
 
     // XP/Enemy system:
     const damage = damagePerLevel[level] || 5;
