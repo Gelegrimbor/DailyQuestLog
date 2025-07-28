@@ -90,8 +90,10 @@ button {
 body {
   margin: 0;
   font-family: 'Press Start 2P', cursive, sans-serif;
-  background: linear-gradient(to bottom, #111, #151515, #1a1a1a, #1c1c1c); /* smoother gradient */
-  background-attachment: fixed; /* optional: keeps background static while scrolling */
+  background: linear-gradient(to bottom, #111, #151515, #1a1a1a, #1c1c1c);
+  /* smoother gradient */
+  background-attachment: fixed;
+  /* optional: keeps background static while scrolling */
   color: #fff;
   text-align: center;
 }
@@ -143,15 +145,19 @@ body {
   transition: 0.3s;
   font-weight: bold;
 }
+
 /* Floating animation for Play Now button */
 .btn-primary {
   animation: floatPulse 2s ease-in-out infinite;
 }
 
 @keyframes floatPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-6px);
   }
@@ -535,12 +541,15 @@ body {
   .dashboard {
     padding-top: 60px;
   }
+
   .quest-input {
     flex-direction: column;
   }
+
   .quest-input input {
     width: 100%;
   }
+
   .quest-input button {
     width: 100%;
   }
@@ -959,7 +968,9 @@ body {
   gap: 0.5rem;
 }
 
-.quest-complete, .quest-delete, .quest-undo {
+.quest-complete,
+.quest-delete,
+.quest-undo {
   width: 32px;
   height: 32px;
   border: none;
@@ -1033,11 +1044,14 @@ body {
 }
 
 .avatar-img {
-  width: 130px;         /* Match enemy size if needed */
+  width: 130px;
+  /* Match enemy size if needed */
   height: 130px;
-  object-fit: cover;    /* crop to circle */
+  object-fit: cover;
+  /* crop to circle */
   border-radius: 50%;
-  border: 4px solid #FFB800;   /* gold ring */
+  border: 4px solid #FFB800;
+  /* gold ring */
   background: #23243b;
   box-shadow: 0 0 15px 2px rgba(255, 184, 0, 0.3);
   margin-bottom: 10px;
@@ -1182,7 +1196,7 @@ body {
   .main-content {
     grid-template-columns: 1fr;
   }
-  
+
   .character-panel {
     order: -1;
   }
@@ -1192,52 +1206,52 @@ body {
   .header-content {
     padding: 1rem;
   }
-  
+
   .header-nav {
     display: none;
   }
-  
+
   .nav-btn span {
     display: none;
   }
-  
+
   .dashboard-container {
     padding: 1rem;
   }
-  
+
   .day-selector {
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   }
-  
+
   .day-btn {
     padding: 0.75rem 0.5rem;
   }
-  
+
   .panel-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
-  
+
   .quest-stats {
     align-self: stretch;
     justify-content: space-between;
   }
-  
+
   .add-quest {
     flex-direction: column;
   }
-  
+
   .quest-item {
     flex-direction: column;
     align-items: stretch;
     gap: 0.75rem;
   }
-  
+
   .quest-content {
     margin-right: 0;
   }
-  
+
   .quest-actions {
     justify-content: center;
   }
@@ -1248,22 +1262,22 @@ body {
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .header-user {
     order: -1;
   }
-  
+
   .day-selector {
     grid-template-columns: 1fr;
   }
-  
+
   .character-avatar {
     display: flex;
     align-items: center;
     gap: 1rem;
     text-align: left;
   }
-  
+
   .character-bars {
     flex: 1;
   }
@@ -1275,6 +1289,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1286,6 +1301,7 @@ body {
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -1293,9 +1309,12 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
@@ -1353,8 +1372,13 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Utility Classes */
@@ -1362,10 +1386,21 @@ body {
   text-align: center;
 }
 
-.mt-1 { margin-top: 0.5rem; }
-.mt-2 { margin-top: 1rem; }
-.mb-1 { margin-bottom: 0.5rem; }
-.mb-2 { margin-bottom: 1rem; }
+.mt-1 {
+  margin-top: 0.5rem;
+}
+
+.mt-2 {
+  margin-top: 1rem;
+}
+
+.mb-1 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-2 {
+  margin-bottom: 1rem;
+}
 
 .hidden {
   display: none;
@@ -1395,14 +1430,17 @@ body {
   cursor: pointer;
   transition: transform 0.2s ease;
 }
+
 .mini-header:hover {
   transform: scale(1.05);
 }
+
 .mini-header .brand-icon {
   font-size: 2.5rem;
   color: #f39c12;
   margin-bottom: 0.5rem;
 }
+
 .mini-header .brand-title {
   font-size: 1.5rem;
   font-weight: bold;
@@ -1438,8 +1476,8 @@ body {
 
 /* 🧍‍♂️ Enemy Avatar */
 .character-avatar .avatar-img {
-  width: 150px;
-  height: auto;
+  width: 130px;
+  height: 130px;
   margin-bottom: 10px;
 }
 
@@ -1534,9 +1572,13 @@ body {
 }
 
 .avatar-img {
-  width: 100px;
-  height: 100px;
-  object-fit: contain;
+  width: 130px;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid #FFB800;
+  background: #23243b;
+  box-shadow: 0 0 15px 2px rgba(255, 184, 0, 0.3);
   margin-bottom: 10px;
 }
 
@@ -1602,6 +1644,7 @@ body {
     opacity: 1;
     transform: translateY(0px) scale(1);
   }
+
   100% {
     opacity: 0;
     transform: translateY(-30px) scale(1.2);
@@ -1644,7 +1687,7 @@ body {
 .username-panel {
   background: #181926;
   border-radius: 24px;
-  box-shadow: 0 0 30px 3px rgba(255,184,0,0.13);
+  box-shadow: 0 0 30px 3px rgba(255, 184, 0, 0.13);
   padding: 48px 32px;
   width: 95vw;
   max-width: 420px;
@@ -1697,7 +1740,9 @@ body {
   transition: color 0.2s;
 }
 
-.char-arrow:hover { color: #ffd43b; }
+.char-arrow:hover {
+  color: #ffd43b;
+}
 
 .char-image-box {
   background: #23243b;
@@ -1734,12 +1779,15 @@ body {
 }
 
 .char-dot {
-  width: 12px; height: 12px; border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
   background: #fff3;
   border: 1.5px solid #FFB800;
   cursor: pointer;
   transition: background 0.2s;
 }
+
 .char-dot.active {
   background: #FFB800;
   border: 1.5px solid #fff;
@@ -1759,15 +1807,18 @@ body {
   box-shadow: 0 0 8px #6C5DD366;
   transition: background 0.2s, transform 0.18s;
 }
+
 .username-continue-btn:disabled {
   background: #333;
   color: #aaa;
   cursor: not-allowed;
 }
+
 .username-continue-btn:not(:disabled):hover {
   background: linear-gradient(135deg, #5145a9, #6C5DD3);
   transform: scale(1.02);
 }
+
 .username-error {
   color: #FF4444;
   margin-top: 20px;

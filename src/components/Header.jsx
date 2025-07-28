@@ -48,14 +48,6 @@ export default function Header() {
             <FiTrendingUp size={20} />
             <span>Dashboard</span>
           </button>
-          <button className="nav-btn" onClick={() => handleNav("/profile")} title="Profile">
-            <FiUser size={20} />
-            <span>Profile</span>
-          </button>
-          <button className="nav-btn" onClick={() => handleNav("/settings")} title="Settings">
-            <FiSettings size={20} />
-            <span>Settings</span>
-          </button>
         </nav>
 
         {/* User Info */}

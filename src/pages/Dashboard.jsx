@@ -91,18 +91,32 @@ export default function Dashboard() {
             level: 1, xp: 0, enemyHp: 25, maxEnemyHp: 25
           });
         }
+        const defaultTasks = {
+          Monday: [],
+          Tuesday: [],
+          Wednesday: [],
+          Thursday: [],
+          Friday: [],
+          Saturday: [],
+          Sunday: [],
+        };
 
-        // Tasks
-        const daysSnap = await getDoc(getTasksRef("days"));
-        const completedSnap = await getDoc(getTasksRef("completed"));
-        setTasks(daysSnap.exists() ? daysSnap.data() : {
-          Monday: [], Tuesday: [], Wednesday: [],
-          Thursday: [], Friday: [], Saturday: [], Sunday: []
-        });
-        setCompletedTasks(completedSnap.exists() ? completedSnap.data() : {
-          Monday: [], Tuesday: [], Wednesday: [],
-          Thursday: [], Friday: [], Saturday: [], Sunday: []
-        });
+        const daysRef = getTasksRef("days");
+        const completedRef = getTasksRef("completed");
+        const daysSnap = await getDoc(daysRef);
+        const completedSnap = await getDoc(completedRef);
+
+        if (!daysSnap.exists()) {
+          await setDoc(daysRef, defaultTasks);
+        }
+        if (!completedSnap.exists()) {
+          await setDoc(completedRef, defaultTasks);
+        }
+
+        setTasks(daysSnap.exists() ? daysSnap.data() : defaultTasks);
+        setCompletedTasks(
+          completedSnap.exists() ? completedSnap.data() : defaultTasks
+        );
       } else {
         setUserId(null);
         setUsername("Not logged in");
@@ -165,22 +179,13 @@ export default function Dashboard() {
     // XP/Level/Enemy progress update
     setEnemyHp((prevHp) => {
       let newHp = Math.max(0, prevHp - damage);
-      let newXp = xp + damage;
+      let newXp = xp;
       let newLevel = level;
       let newEnemy = enemyInfo[level];
       let newMaxHp = maxEnemyHp;
 
       if (newHp <= 0) {
-        newLevel = Math.min(level + 1, 5);
-        newEnemy = enemyInfo[newLevel];
-        newHp = newEnemy.hp;
-        newMaxHp = newEnemy.hp;
-        newXp = 0;
-        setLevel(newLevel);
-        setEnemyName(newEnemy.name);
-        setEnemyImage(newEnemy.img);
-        setXpToNextLevel(newEnemy.xp);
-      } else if (newXp >= xpToNextLevel) {
+        newXp += xpToNextLevel;
         newLevel = Math.min(level + 1, 5);
         newEnemy = enemyInfo[newLevel];
         newHp = newEnemy.hp;
