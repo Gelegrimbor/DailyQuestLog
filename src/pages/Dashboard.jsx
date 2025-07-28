@@ -31,6 +31,8 @@ export default function Dashboard() {
   const [enemyImage, setEnemyImage] = useState("/images/enemy1.gif");
   const [userId, setUserId] = useState(null);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [tasksLoaded, setTasksLoaded] = useState(false);
+  const [completedLoaded, setCompletedLoaded] = useState(false);
 
   const damagePerLevel = {
     1: 2, 2: 5, 3: 10, 4: 10, 5: 20,
@@ -115,10 +117,12 @@ export default function Dashboard() {
         }
 
         setTasks(daysSnap.exists() ? daysSnap.data() : defaultTasks);
+        setTasksLoaded(true);
+
         setCompletedTasks(
           completedSnap.exists() ? completedSnap.data() : defaultTasks
         );
-        setHasLoaded(true);
+        setCompletedLoaded(true);
       } else {
         setUserId(null);
         setUsername("Not logged in");
@@ -135,19 +139,18 @@ export default function Dashboard() {
 
   // --- Save tasks to Firestore on change ---
   useEffect(() => {
-    if (!userId || !hasLoaded) return;
+    if (!userId || !tasksLoaded) return;
     updateDoc(getTasksRef("days"), tasks).catch(() =>
       setDoc(getTasksRef("days"), tasks)
     );
-    // eslint-disable-next-line
-  }, [tasks, userId, hasLoaded]);
+  }, [tasks, userId, tasksLoaded]);
+
   useEffect(() => {
-    if (!userId || !hasLoaded) return;
+    if (!userId || !completedLoaded) return;
     updateDoc(getTasksRef("completed"), completedTasks).catch(() =>
       setDoc(getTasksRef("completed"), completedTasks)
     );
-    // eslint-disable-next-line
-  }, [completedTasks, userId, hasLoaded]);
+  }, [completedTasks, userId, completedLoaded]);
 
   // --- Task Handlers ---
   const handleAddTask = () => {
