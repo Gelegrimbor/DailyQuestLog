@@ -29,20 +29,30 @@ export default function Home() {
 
       {/* Feature Scroll Section */}
       <div className="features-section">
-        <div className="feature-row">
-          <video src="/assets/track.mp4" autoPlay loop muted className="feature-video"></video>
-          <div className="feature-paragraph">
-            <h2>Track Daily Quests</h2>
-            <p>Set daily goals, complete them, and earn XP as you progress through real life missions.</p>
-          </div>
+        <div className="feature-item">
+          <video
+            src="/images/Add-task-vid.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="feature-media"
+          />
+          <h2>Track Daily Quests</h2>
+          <p>Set daily goals, complete them, and earn XP as you progress through real life missions.</p>
         </div>
 
-        <div className="feature-row reverse">
-          <div className="feature-paragraph">
-            <h2>Level Up Like a Hero</h2>
-            <p>Each completed quest brings you closer to leveling up. Gain motivation with every click.</p>
-          </div>
-          <video src="/assets/levelup.mp4" autoPlay loop muted className="feature-video"></video>
+        <div className="feature-item">
+          <video
+            src="/images/Lvl-up-vid.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="feature-media"
+          />
+          <h2>Level Up Like a Hero</h2>
+          <p>Each completed quest brings you closer to leveling up. Gain motivation with every click.</p>
         </div>
       </div>
 
