@@ -193,6 +193,17 @@ body {
   color: #ccc;
 }
 
+.feature-item {
+  margin-bottom: 50px;
+}
+
+.feature-media {
+  width: 260px;
+  height: auto;
+  display: block;
+  margin: 0 auto 20px;
+}
+
 .footer-icons {
   display: flex;
   justify-content: center;
