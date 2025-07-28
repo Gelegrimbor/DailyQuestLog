@@ -168,7 +168,6 @@ export default function Dashboard() {
       });
     }
   };
-
   // XP/Enemy system:
   const damage = damagePerLevel[level] || 5;
   setDamageDealt(`-${damage}`);
@@ -367,4 +366,3 @@ return (
     </div>
   </div>
 );
-}
