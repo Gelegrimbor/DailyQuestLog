@@ -144,229 +144,227 @@ export default function Dashboard() {
   }, [completedTasks, userId]);
 
   // --- Task Handlers ---
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (!newTask.trim()) return;
+
+    const updated = [...tasks[selectedDay], newTask];
+
     setTasks((prev) => ({
       ...prev,
-      [selectedDay]: [...prev[selectedDay], newTask]
+      [selectedDay]: updated
     }));
     setNewTask("");
+
+    // Save to Firestore
+    const daysRef = getTasksRef("days");
+    try {
+      await updateDoc(daysRef, {
+        [selectedDay]: updated
+      });
+    } catch (err) {
+      await setDoc(daysRef, {
+        ...tasks,
+        [selectedDay]: updated
+      });
+    }
   };
 
-  const handleDeleteTask = (idx) => {
-    setTasks((prev) => ({
-      ...prev,
-      [selectedDay]: prev[selectedDay].filter((_, i) => i !== idx)
-    }));
-  };
+  // XP/Enemy system:
+  const damage = damagePerLevel[level] || 5;
+  setDamageDealt(`-${damage}`);
+  setTimeout(() => setDamageDealt(null), 800);
 
-  const handleCompleteTask = (idx) => {
-    const task = tasks[selectedDay][idx];
-    setTasks((prev) => ({
-      ...prev,
-      [selectedDay]: prev[selectedDay].filter((_, i) => i !== idx)
-    }));
-    setCompletedTasks((prev) => ({
-      ...prev,
-      [selectedDay]: [...prev[selectedDay], task]
-    }));
+  // XP/Level/Enemy progress update
+  setEnemyHp((prevHp) => {
+    let newHp = Math.max(0, prevHp - damage);
+    let newXp = xp;
+    let newLevel = level;
+    let newEnemy = enemyInfo[level];
+    let newMaxHp = maxEnemyHp;
 
-    // XP/Enemy system:
-    const damage = damagePerLevel[level] || 5;
-    setDamageDealt(`-${damage}`);
-    setTimeout(() => setDamageDealt(null), 800);
+    if (newHp <= 0) {
+      newXp += xpToNextLevel;
+      newLevel = Math.min(level + 1, 5);
+      newEnemy = enemyInfo[newLevel];
+      newHp = newEnemy.hp;
+      newMaxHp = newEnemy.hp;
+      newXp = 0;
+      setLevel(newLevel);
+      setEnemyName(newEnemy.name);
+      setEnemyImage(newEnemy.img);
+      setXpToNextLevel(newEnemy.xp);
+    }
+    setXp(newXp);
+    setMaxEnemyHp(newMaxHp);
 
-    // XP/Level/Enemy progress update
-    setEnemyHp((prevHp) => {
-      let newHp = Math.max(0, prevHp - damage);
-      let newXp = xp;
-      let newLevel = level;
-      let newEnemy = enemyInfo[level];
-      let newMaxHp = maxEnemyHp;
-
-      if (newHp <= 0) {
-        newXp += xpToNextLevel;
-        newLevel = Math.min(level + 1, 5);
-        newEnemy = enemyInfo[newLevel];
-        newHp = newEnemy.hp;
-        newMaxHp = newEnemy.hp;
-        newXp = 0;
-        setLevel(newLevel);
-        setEnemyName(newEnemy.name);
-        setEnemyImage(newEnemy.img);
-        setXpToNextLevel(newEnemy.xp);
-      }
-      setXp(newXp);
-      setMaxEnemyHp(newMaxHp);
-
-      // SAVE PROGRESS TO FIRESTORE
-      if (userId) {
-        updateDoc(getStatsRef(), {
+    // SAVE PROGRESS TO FIRESTORE
+    if (userId) {
+      updateDoc(getStatsRef(), {
+        level: newLevel,
+        xp: newXp,
+        enemyHp: newHp,
+        maxEnemyHp: newMaxHp
+      }).catch(() =>
+        setDoc(getStatsRef(), {
           level: newLevel,
           xp: newXp,
           enemyHp: newHp,
           maxEnemyHp: newMaxHp
-        }).catch(() =>
-          setDoc(getStatsRef(), {
-            level: newLevel,
-            xp: newXp,
-            enemyHp: newHp,
-            maxEnemyHp: newMaxHp
-          })
-        );
-      }
-      return newHp;
-    });
-  };
+        })
+      );
+    }
+    return newHp;
+  });
+};
 
-  const handleUncompleteTask = (idx) => {
-    const task = completedTasks[selectedDay][idx];
-    setCompletedTasks((prev) => ({
-      ...prev,
-      [selectedDay]: prev[selectedDay].filter((_, i) => i !== idx)
-    }));
-    setTasks((prev) => ({
-      ...prev,
-      [selectedDay]: [...prev[selectedDay], task]
-    }));
-  };
+const handleUncompleteTask = (idx) => {
+  const task = completedTasks[selectedDay][idx];
+  setCompletedTasks((prev) => ({
+    ...prev,
+    [selectedDay]: prev[selectedDay].filter((_, i) => i !== idx)
+  }));
+  setTasks((prev) => ({
+    ...prev,
+    [selectedDay]: [...prev[selectedDay], task]
+  }));
+};
 
-  // --- Init selected day on mount
-  useEffect(() => {
-    const dayNames = [
-      "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
-    ];
-    setSelectedDay(dayNames[new Date().getDay()]);
-  }, []);
+// --- Init selected day on mount
+useEffect(() => {
+  const dayNames = [
+    "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+  ];
+  setSelectedDay(dayNames[new Date().getDay()]);
+}, []);
 
-  // --- UI ---
-  return (
-    <div className="dashboard-wrapper">
-      <div className="dashboard-container">
-        <div className="day-navigation">
-          <h2 className="section-title">Quest Calendar</h2>
-          <div className="day-selector">
-            {Object.keys(tasks).map((day) => (
-              <button
-                key={day}
-                className={`day-btn ${selectedDay === day ? "active" : ""} ${new Date().toLocaleDateString("en-US", { weekday: "long" }) === day ? "today" : ""}`}
-                onClick={() => setSelectedDay(day)}
-              >
-                <span className="day-name">{day.slice(0, 3)}</span>
-                <span className="day-progress">
-                  {completedTasks[day].length}/{tasks[day].length + completedTasks[day].length}
-                </span>
-              </button>
-            ))}
-          </div>
+// --- UI ---
+return (
+  <div className="dashboard-wrapper">
+    <div className="dashboard-container">
+      <div className="day-navigation">
+        <h2 className="section-title">Quest Calendar</h2>
+        <div className="day-selector">
+          {Object.keys(tasks).map((day) => (
+            <button
+              key={day}
+              className={`day-btn ${selectedDay === day ? "active" : ""} ${new Date().toLocaleDateString("en-US", { weekday: "long" }) === day ? "today" : ""}`}
+              onClick={() => setSelectedDay(day)}
+            >
+              <span className="day-name">{day.slice(0, 3)}</span>
+              <span className="day-progress">
+                {completedTasks[day].length}/{tasks[day].length + completedTasks[day].length}
+              </span>
+            </button>
+          ))}
         </div>
-        <div className="main-content">
-          <div className="quest-panel">
-            <div className="panel-header">
-              <h2 className="quest-title">
-                {selectedDay}'s Quests {new Date().toLocaleDateString("en-US", { weekday: "long" }) === selectedDay && <span className="today-badge">Today</span>}
-              </h2>
-              <div className="quest-stats">
-                <span className="active-quests">{tasks[selectedDay].length} Active</span>
-                <span className="completed-quests">{completedTasks[selectedDay].length} Completed</span>
-              </div>
+      </div>
+      <div className="main-content">
+        <div className="quest-panel">
+          <div className="panel-header">
+            <h2 className="quest-title">
+              {selectedDay}'s Quests {new Date().toLocaleDateString("en-US", { weekday: "long" }) === selectedDay && <span className="today-badge">Today</span>}
+            </h2>
+            <div className="quest-stats">
+              <span className="active-quests">{tasks[selectedDay].length} Active</span>
+              <span className="completed-quests">{completedTasks[selectedDay].length} Completed</span>
             </div>
-            <div className="add-quest">
-              <input
-                value={newTask}
-                onChange={(e) => setNewTask(e.target.value)}
-                placeholder="Enter a new quest..."
-                className="quest-input"
-                onKeyPress={(e) => e.key === "Enter" && handleAddTask()}
-              />
-              <button onClick={handleAddTask} className="quest-add-btn">Add Quest</button>
-            </div>
+          </div>
+          <div className="add-quest">
+            <input
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+              placeholder="Enter a new quest..."
+              className="quest-input"
+              onKeyPress={(e) => e.key === "Enter" && handleAddTask()}
+            />
+            <button onClick={handleAddTask} className="quest-add-btn">Add Quest</button>
+          </div>
+          <div className="quest-section">
+            <h3 className="quest-section-title">Active Quests</h3>
+            <ul className="quest-list">
+              {tasks[selectedDay].length === 0 ? (
+                <li className="empty-state">No active quests for {selectedDay}</li>
+              ) : (
+                tasks[selectedDay].map((task, i) => (
+                  <li key={i} className="quest-item active">
+                    <div className="quest-content">
+                      <span className="quest-text">{task}</span>
+                      <span className="quest-reward">+XP</span>
+                    </div>
+                    <div className="quest-actions">
+                      <button onClick={() => handleCompleteTask(i)} className="quest-complete">✓</button>
+                      <button onClick={() => handleDeleteTask(i)} className="quest-delete">✕</button>
+                    </div>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+          {completedTasks[selectedDay].length > 0 && (
             <div className="quest-section">
-              <h3 className="quest-section-title">Active Quests</h3>
+              <h3 className="quest-section-title">Completed Quests</h3>
               <ul className="quest-list">
-                {tasks[selectedDay].length === 0 ? (
-                  <li className="empty-state">No active quests for {selectedDay}</li>
-                ) : (
-                  tasks[selectedDay].map((task, i) => (
-                    <li key={i} className="quest-item active">
-                      <div className="quest-content">
-                        <span className="quest-text">{task}</span>
-                        <span className="quest-reward">+XP</span>
-                      </div>
-                      <div className="quest-actions">
-                        <button onClick={() => handleCompleteTask(i)} className="quest-complete">✓</button>
-                        <button onClick={() => handleDeleteTask(i)} className="quest-delete">✕</button>
-                      </div>
-                    </li>
-                  ))
-                )}
+                {completedTasks[selectedDay].map((task, i) => (
+                  <li key={i} className="quest-item completed">
+                    <div className="quest-content">
+                      <span className="quest-text">{task}</span>
+                      <span className="quest-reward completed">+XP</span>
+                    </div>
+                    <div className="quest-actions">
+                      <button onClick={() => handleUncompleteTask(i)} className="quest-undo">↶</button>
+                    </div>
+                  </li>
+                ))}
               </ul>
             </div>
-            {completedTasks[selectedDay].length > 0 && (
-              <div className="quest-section">
-                <h3 className="quest-section-title">Completed Quests</h3>
-                <ul className="quest-list">
-                  {completedTasks[selectedDay].map((task, i) => (
-                    <li key={i} className="quest-item completed">
-                      <div className="quest-content">
-                        <span className="quest-text">{task}</span>
-                        <span className="quest-reward completed">+XP</span>
-                      </div>
-                      <div className="quest-actions">
-                        <button onClick={() => handleUncompleteTask(i)} className="quest-undo">↶</button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+          )}
+        </div>
+        <div className="right-panels">
+          <div className="user-panel">
+            <div className="character-header">
+              <h2 className="section-title">Your Character</h2>
+            </div>
+            <div className="character-avatar">
+              <img src={userCharacter.img} alt={userCharacter.name} className="avatar-img" />
+            </div>
+            <div className="char-name" style={{ color: "#fff", fontWeight: "bold", fontSize: "1.1rem", marginBottom: 2 }}>{userCharacter.name}</div>
+            <h3 className="username">{username}</h3>
+            <div className="character-bars">
+              <div className="stat-bar">
+                <label>Level {level}</label>
+                <div className="bar-container">
+                  <div className="bar xp-bar">
+                    <div className="bar-fill xp-fill" style={{ width: `${(xp / xpToNextLevel) * 100}%` }}></div>
+                  </div>
+                </div>
+                <span className="bar-text">{xp} / {xpToNextLevel}</span>
               </div>
-            )}
+            </div>
           </div>
-          <div className="right-panels">
-            <div className="user-panel">
-              <div className="character-header">
-                <h2 className="section-title">Your Character</h2>
-              </div>
-              <div className="character-avatar">
-                <img src={userCharacter.img} alt={userCharacter.name} className="avatar-img" />
-              </div>
-              <div className="char-name" style={{ color: "#fff", fontWeight: "bold", fontSize: "1.1rem", marginBottom: 2 }}>{userCharacter.name}</div>
-              <h3 className="username">{username}</h3>
-              <div className="character-bars">
-                <div className="stat-bar">
-                  <label>Level {level}</label>
-                  <div className="bar-container">
-                    <div className="bar xp-bar">
-                      <div className="bar-fill xp-fill" style={{ width: `${(xp / xpToNextLevel) * 100}%` }}></div>
-                    </div>
+          <div className="enemy-panel">
+            <div className="character-header">
+              <h2 className="section-title">Enemy Encounter</h2>
+            </div>
+            <div className="character-avatar">
+              <img src={enemyImage} alt={enemyName} className="avatar-img" />
+            </div>
+            <h3 className="enemy-name">{enemyName}</h3>
+            <div className="character-bars">
+              <div className="stat-bar">
+                <label>Health</label>
+                <div className="bar-container">
+                  <div className="bar hp-bar">
+                    <div className="bar-fill hp-fill" style={{ width: `${(enemyHp / maxEnemyHp) * 100}%` }}></div>
                   </div>
-                  <span className="bar-text">{xp} / {xpToNextLevel}</span>
                 </div>
+                <span className="bar-text">{enemyHp} / {maxEnemyHp}</span>
               </div>
             </div>
-            <div className="enemy-panel">
-              <div className="character-header">
-                <h2 className="section-title">Enemy Encounter</h2>
-              </div>
-              <div className="character-avatar">
-                <img src={enemyImage} alt={enemyName} className="avatar-img" />
-              </div>
-              <h3 className="enemy-name">{enemyName}</h3>
-              <div className="character-bars">
-                <div className="stat-bar">
-                  <label>Health</label>
-                  <div className="bar-container">
-                    <div className="bar hp-bar">
-                      <div className="bar-fill hp-fill" style={{ width: `${(enemyHp / maxEnemyHp) * 100}%` }}></div>
-                    </div>
-                  </div>
-                  <span className="bar-text">{enemyHp} / {maxEnemyHp}</span>
-                </div>
-              </div>
-              {damageDealt && <div className="floating-damage">{damageDealt}</div>}
-            </div>
+            {damageDealt && <div className="floating-damage">{damageDealt}</div>}
           </div>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }
