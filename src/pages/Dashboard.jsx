@@ -35,12 +35,12 @@ export default function Dashboard() {
   const [completedLoaded, setCompletedLoaded] = useState(false);
 
   const damagePerLevel = {
-    1: 2, 2: 5, 3: 10, 4: 10, 5: 20,
+    1: 5, 2: 10, 3: 10, 4: 10, 5: 20,
   };
 
   const enemyInfo = {
-    1: { hp: 25, name: "Skeleton", img: "/images/enemy1.gif", xp: 20 },
-    2: { hp: 30, name: "Goblin", img: "/images/enemy2.gif", xp: 30 },
+    1: { hp: 30, name: "Skeleton", img: "/images/enemy1.gif", xp: 20 },
+    2: { hp: 40, name: "Goblin", img: "/images/enemy2.gif", xp: 30 },
     3: { hp: 50, name: "Troll", img: "/images/enemy3.gif", xp: 50 },
     4: { hp: 100, name: "Dragon", img: "/images/enemy4.gif", xp: 100 },
     5: { hp: 5000, name: "Demon Lord", img: "/images/enemy5.gif", xp: 999 },
