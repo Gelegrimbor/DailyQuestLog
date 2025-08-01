@@ -4,6 +4,9 @@ import { onAuthStateChanged } from "firebase/auth";
 import {
   doc, getDoc, setDoc, updateDoc
 } from "firebase/firestore";
+import { saveUserStats } from "../saveUserStats";
+import { loadUserStats } from "../loadUserStats";
+
 
 export default function Dashboard() {
   const [selectedDay, setSelectedDay] = useState("Monday");
@@ -33,6 +36,24 @@ export default function Dashboard() {
   const [hasLoaded, setHasLoaded] = useState(false);
   const [tasksLoaded, setTasksLoaded] = useState(false);
   const [completedLoaded, setCompletedLoaded] = useState(false);
+
+  // Load saved stats from Firestore
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (userId) {
+        const stats = await loadUserStats(userId);
+        if (stats) {
+          setLevel(stats.level);
+          setXp(stats.xp);
+          setEnemyHp(stats.enemyHp);
+          setMaxEnemyHp(stats.maxEnemyHp);
+          console.log("📥 Loaded user stats:", stats);
+        }
+      }
+    };
+    fetchStats();
+  }, [userId]);
+
 
   const damagePerLevel = {
     1: 5, 2: 10, 3: 10, 4: 10, 5: 20,
@@ -226,20 +247,14 @@ export default function Dashboard() {
 
       // SAVE PROGRESS TO FIRESTORE
       if (userId) {
-        updateDoc(getStatsRef(), {
+        saveUserStats(userId, {
           level: newLevel,
           xp: newXp,
           enemyHp: newHp,
-          maxEnemyHp: newMaxHp
-        }).catch(() =>
-          setDoc(getStatsRef(), {
-            level: newLevel,
-            xp: newXp,
-            enemyHp: newHp,
-            maxEnemyHp: newMaxHp
-          })
-        );
+          maxEnemyHp: newMaxHp,
+        });
       }
+
       return newHp;
     });
   };
